@@ -1,0 +1,22 @@
+﻿<Controls:MetroWindow x:Class="brbypass_client.win_addProxyServer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:brbypass_client"
+        mc:Ignorable="d"
+        Title="Add New Proxy Server" Height="343.929" Width="270.732">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="7*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Host" HorizontalAlignment="Left" Margin="24,24,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="24,54,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="217" Grid.ColumnSpan="2"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="24,85,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="24,115,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="217" Grid.ColumnSpan="2"/>
+        <Button Content="Save" Grid.Column="1" HorizontalAlignment="Left" Margin="11,275,0,0" VerticalAlignment="Top" Width="75" Background="#FF1FAEFF" Foreground="White"/>
+
+    </Grid>
+</Controls:MetroWindow>
