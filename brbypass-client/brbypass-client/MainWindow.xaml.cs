@@ -14,6 +14,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using MahApps.Metro.Controls;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using brbypass_client.Model;
 
 namespace brbypass_client
 {
@@ -40,7 +43,43 @@ namespace brbypass_client
             if (Directory.Exists(startupPath + "config")){
                 if (File.Exists(startupPath+"config\\servers.json"))
                 {
-
+                    //init items
+                    Server[] servers;
+                    using (StreamReader jsonFile = File.OpenText(startupPath + "config\\servers.json"))
+                    {
+                        servers = JsonConvert.DeserializeObject<Server[]>(jsonFile.ReadToEnd());
+                    }
+                    if (servers.Length > 0)
+                    {
+                        for (int i = 0; i < servers.Length; i++)
+                        {
+                            cb_selectServer.Items.Add(servers[i].host);
+                        }
+                        //init selected item
+                        int lastchoice = -1;
+                        if (File.Exists(startupPath + "config\\lastChoice.json"))
+                        {
+                            using (StreamReader lastChoiceConfig = File.OpenText(startupPath + "config\\lastChoice.json"))
+                            {
+                                using (JsonTextReader reader = new JsonTextReader(lastChoiceConfig))
+                                {
+                                    JObject o = (JObject)JToken.ReadFrom(reader);
+                                    try
+                                    {
+                                        lastchoice = (int)o["lastChoice"];
+                                    } catch (Exception err)
+                                    {
+                                        
+                                    }
+                                }
+                            }
+                        }
+                        cb_selectServer.SelectedIndex = lastchoice;
+                    }
+                    else
+                    {
+                        cb_selectServer.IsEnabled = false;
+                    }
                 } else
                 {
                     //disable combobox when config is not found
@@ -61,6 +100,17 @@ namespace brbypass_client
             win_addProxyServer win_aps = new win_addProxyServer();
             win_aps.Show();
             this.IsEnabled = false;
+        }
+
+        private void MetroWindow_Closed(object sender, EventArgs e)
+        {
+            //save last choice of server
+            using (StreamWriter sw = new StreamWriter(startupPath + "config\\lastChoice.json"))
+            {
+                sw.WriteLine("{\"lastChoice\":" + cb_selectServer.SelectedIndex + ",\"lastChoiceHost\":\""+cb_selectServer.SelectedItem.ToString()+"\"}");
+                sw.Flush();
+                sw.Close();
+            }
         }
     }
 }

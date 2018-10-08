@@ -75,6 +75,8 @@ namespace brbypass_client
                     }
                 }
                 this.Close();
+                //Add to mainWindow's combobox
+                MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
             } else
             {
                 Server server = new Server();
@@ -91,7 +93,9 @@ namespace brbypass_client
                         serializer.Serialize(writer, servers);
                     }
                 }
-                this.Close();                
+                this.Close();
+                //Add to mainWindow's combobox
+                MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
             }
         }
     }

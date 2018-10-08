@@ -18,7 +18,7 @@
         mc:Ignorable="d"
         Title="BRBypass" Height="480" Width="384.5"
         ResizeMode="NoResize" TitleForeground="White"
-        WindowTitleBrush="{DynamicResource AccentColorBrush}" Loaded="MetroWindow_Loaded">
+        WindowTitleBrush="{DynamicResource AccentColorBrush}" Loaded="MetroWindow_Loaded" Closed="MetroWindow_Closed">
     <Grid>
         <Label Content="Server:" HorizontalAlignment="Left" Margin="20,139,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Grid.IsSharedSizeScope="True" Height="26" Width="60"/>
         <ComboBox x:Name="cb_selectServer" HorizontalAlignment="Left" Margin="20,170,0,0" VerticalAlignment="Top" Width="252" BorderThickness="0,0,0,1"/>
@@ -27,6 +27,7 @@
         <Button Content="Edit" HorizontalAlignment="Left" Margin="322,172,0,0" VerticalAlignment="Top" Width="44" Height="26" FontSize="12" Padding="0"/>
         <Button Content="Connect" HorizontalAlignment="Center" Margin="0,328,0,0" VerticalAlignment="Top" Width="144" Height="44" FontSize="17"/>
         <Button Content="Manage" HorizontalAlignment="Left" Margin="286,208,0,0" VerticalAlignment="Top" Width="80" Height="24" FontSize="12" Padding="16,0"/>
+        <Button x:Name="btn_test" Content="Test" HorizontalAlignment="Left" Margin="20,208,0,0" VerticalAlignment="Top" Width="47" Height="24" FontSize="12" Padding="0"/>
     </Grid>
     
 </metro:MetroWindow>
