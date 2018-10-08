@@ -24,5 +24,10 @@ namespace brbypass_client
         {
             InitializeComponent();
         }
+
+        private void MetroWindow_Closed(object sender, EventArgs e)
+        {
+            MainWindow.mainWindow.IsEnabled = true;
+        }
     }
 }

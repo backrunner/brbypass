@@ -21,9 +21,23 @@ namespace brbypass_client
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        //window obj
+        public static MainWindow mainWindow;
+
+        //config path
+
+
         public MainWindow()
         {
             InitializeComponent();
+            mainWindow = this;
+        }
+
+        private void btn_addProxyServer_Click(object sender, RoutedEventArgs e)
+        {
+            win_addProxyServer win_aps = new win_addProxyServer();
+            win_aps.Show();
+            this.IsEnabled = false;
         }
     }
 }
