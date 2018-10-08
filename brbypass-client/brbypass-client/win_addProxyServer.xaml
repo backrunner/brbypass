@@ -20,15 +20,12 @@
         ResizeMode="NoResize" TitleForeground="White"
         WindowTitleBrush="{DynamicResource AccentColorBrush}">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10*"/>
-            <ColumnDefinition Width="7*"/>
-        </Grid.ColumnDefinitions>
         <Label Content="Host" HorizontalAlignment="Left" Margin="24,24,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="24,54,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="txt_host" HorizontalAlignment="Left" Height="23" Margin="24,54,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
         <Label Content="Port" HorizontalAlignment="Left" Margin="24,85,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="24,115,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217" Grid.ColumnSpan="2"/>
-        <Button Content="Save" Grid.Column="1" Margin="11,268,22,0" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White"/>
-
+        <TextBox x:Name="txt_port" HorizontalAlignment="Left" Height="23" Margin="24,115,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
+        <Label Content="Password" HorizontalAlignment="Left" Margin="24,148,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <PasswordBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="24,179,0,0" VerticalAlignment="Top" Width="217"/>
+        <Button x:Name="btn_AddServer_Save" Margin="24,250,22,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White" Width="217" Content="Save" Click="btn_AddServer_Save_Click"/>
     </Grid>
 </metro:MetroWindow>
