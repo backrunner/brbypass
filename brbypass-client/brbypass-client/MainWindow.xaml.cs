@@ -17,6 +17,8 @@ using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using brbypass_client.Model;
+using System.Net.NetworkInformation;
+using brbypass_client.Controller;
 
 namespace brbypass_client
 {
@@ -37,15 +39,16 @@ namespace brbypass_client
             mainWindow = this;
         }
 
+        public Server[] servers;
+
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //check config file
             if (Directory.Exists(startupPath + "config")){
-                if (File.Exists(startupPath+"config\\servers.json"))
+                if (File.Exists(ServerConfig.Path))
                 {
-                    //init items
-                    Server[] servers;
-                    using (StreamReader jsonFile = File.OpenText(startupPath + "config\\servers.json"))
+                    //init items                    
+                    using (StreamReader jsonFile = File.OpenText(ServerConfig.Path))
                     {
                         servers = JsonConvert.DeserializeObject<Server[]>(jsonFile.ReadToEnd());
                     }
@@ -69,7 +72,7 @@ namespace brbypass_client
                                         lastchoice = (int)o["lastChoice"];
                                     } catch (Exception err)
                                     {
-                                        
+                                        //do nothing
                                     }
                                 }
                             }
@@ -110,6 +113,53 @@ namespace brbypass_client
                 sw.WriteLine("{\"lastChoice\":" + cb_selectServer.SelectedIndex + ",\"lastChoiceHost\":\""+cb_selectServer.SelectedItem.ToString()+"\"}");
                 sw.Flush();
                 sw.Close();
+            }
+        }
+
+        //ping delay
+        private double averagePingDelay = 0;
+        private short nowPingTest = 0;
+        private short successPingTest = 0;
+
+        private void btn_test_Click(object sender, RoutedEventArgs e)
+        {
+            //init ping
+            Ping ping = new Ping();
+            averagePingDelay = 0;
+            nowPingTest = 0;
+            successPingTest = 0;
+            //send ping
+            for (int i = 0; i < 8; i++)
+            {
+                sendPingToHost(cb_selectServer.SelectedItem.ToString());
+            }
+            //disable button
+            btn_test.IsEnabled = false;
+        }
+
+        private async void sendPingToHost(string hostname)
+        {
+            Ping ping = new Ping();
+            PingReply reply = await ping.SendPingAsync(hostname,1000);
+            nowPingTest++;
+            if (reply.Status == IPStatus.Success)
+            {
+                successPingTest++;
+                averagePingDelay += reply.RoundtripTime;
+            }
+            if (nowPingTest == 8)
+            {
+                if (successPingTest > 0)
+                {
+                    btn_test.IsEnabled = true;
+                    averagePingDelay = averagePingDelay / successPingTest;
+                    lbl_pingDelay.Content = ((int)averagePingDelay).ToString() + "ms";
+                }
+                else
+                {
+                    lbl_pingDelay.Content = "Failed";
+                    btn_test.IsEnabled = true;
+                }
             }
         }
     }

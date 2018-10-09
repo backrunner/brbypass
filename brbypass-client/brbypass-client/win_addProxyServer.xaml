@@ -16,16 +16,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:brbypass_client"
         mc:Ignorable="d"
-        Title="Add New Proxy Server" Height="351.929" Width="270.732" Closed="MetroWindow_Closed"
+        Title="Add New Proxy Server" Height="377.929" Width="270.732" Closed="MetroWindow_Closed"
         ResizeMode="NoResize" TitleForeground="White"
         WindowTitleBrush="{DynamicResource AccentColorBrush}">
     <Grid>
-        <Label Content="Host" HorizontalAlignment="Left" Margin="24,24,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
-        <TextBox x:Name="txt_host" HorizontalAlignment="Left" Height="23" Margin="24,54,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
-        <Label Content="Port" HorizontalAlignment="Left" Margin="24,85,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
-        <TextBox x:Name="txt_port" HorizontalAlignment="Left" Height="23" Margin="24,115,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
-        <Label Content="Password" HorizontalAlignment="Left" Margin="24,148,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
-        <PasswordBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="24,179,0,0" VerticalAlignment="Top" Width="217"/>
-        <Button x:Name="btn_AddServer_Save" Margin="24,250,22,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White" Width="217" Content="Save" Click="btn_AddServer_Save_Click"/>
+        <Label Content="Host" HorizontalAlignment="Left" Margin="24,17,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <TextBox x:Name="txt_host" HorizontalAlignment="Left" Height="23" Margin="24,47,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="24,78,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <TextBox x:Name="txt_port" HorizontalAlignment="Left" Height="23" Margin="24,108,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
+        <Label Content="Password" HorizontalAlignment="Left" Margin="24,141,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <PasswordBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="24,172,0,0" VerticalAlignment="Top" Width="217"/>
+        <Button x:Name="btn_AddServer_Save" Margin="24,288,22,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White" Width="217" Content="Save" Click="btn_AddServer_Save_Click"/>
+        <Label Content="Local Port" HorizontalAlignment="Left" Margin="24,203,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <TextBox x:Name="txt_localPort" HorizontalAlignment="Left" Height="23" Margin="24,234,0,0" TextWrapping="Wrap" Text="8100" VerticalAlignment="Top" Width="217"/>
     </Grid>
 </metro:MetroWindow>
