@@ -1,0 +1,30 @@
+﻿<metro:MetroWindow x:Class="brbypass_client.win_Log"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:brbypass_client"
+        mc:Ignorable="d"
+        Title="Log" Height="456.696" Width="750"
+        ResizeMode="NoResize"
+                   GlowBrush="{DynamicResource AccentColorBrush}"
+        BorderThickness="1"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        WindowTitleBrush="{DynamicResource AccentColorBrush}" Loaded="MetroWindow_Loaded" Closed="MetroWindow_Closed">
+    <Grid>
+        <ScrollViewer x:Name="sv_log" VerticalScrollBarVisibility="Auto" Margin="10,10,10,37">
+            <TextBlock x:Name="tb_log" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Top"  Width="Auto" FontSize="12"/>
+        </ScrollViewer>
+        <Button x:Name="btn_clear" Content="Clear" HorizontalAlignment="Left" Margin="667,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" FontSize="12" Click="btn_clear_Click"/>
+        <Button x:Name="btn_export" Content="Export" HorizontalAlignment="Left" Margin="527,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" RenderTransformOrigin="0.862,0.667" FontSize="12"/>
+        <Button x:Name="btn_refresh" Content="Refresh" HorizontalAlignment="Left" Margin="597,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" FontSize="12" Click="btn_refresh_Click"/>
+    </Grid>
+</metro:MetroWindow>

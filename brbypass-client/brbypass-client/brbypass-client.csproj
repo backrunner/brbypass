@@ -85,10 +85,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controller\LogController.cs" />
     <Compile Include="Controller\ServerConfig.cs" />
+    <Compile Include="Model\Log.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="win_addProxyServer.xaml.cs">
       <DependentUpon>win_addProxyServer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="win_Log.xaml.cs">
+      <DependentUpon>win_Log.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -103,6 +108,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="win_addProxyServer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="win_Log.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

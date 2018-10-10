@@ -13,19 +13,25 @@ namespace brbypass_client.Model
         public string password;
         public int localPort;
 
+        //mode:
+        //1: HTTP
+        public int mode;
+
         public Server()
         {
             host = "";
             port = 0;
             password = "";
             localPort = 8100;
+            mode = 1;
         }
         public Server(string host, int port, string password)
         {
             this.host = host;
             this.port = port;
             this.password = password;
-            this.localPort = 8100;
+            localPort = 8100;
+            mode = 1;
         }
         public Server(string host, int port, string password,int localPort)
         {
@@ -33,6 +39,15 @@ namespace brbypass_client.Model
             this.port = port;
             this.password = password;
             this.localPort = localPort;
+            mode = 1;
+        }
+        public Server(string host, int port, string password, int localPort,int mode)
+        {
+            this.host = host;
+            this.port = port;
+            this.password = password;
+            this.localPort = localPort;
+            this.mode = 1;
         }
     }
 }

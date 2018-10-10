@@ -16,7 +16,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:brbypass_client"
         mc:Ignorable="d"
-        Title="Add New Proxy Server" Height="377.929" Width="270.732" Closed="MetroWindow_Closed"
+        Title="Add New Proxy Server" Height="430.929" Width="270.732" Closed="MetroWindow_Closed"
         ResizeMode="NoResize" TitleForeground="White"
         WindowTitleBrush="{DynamicResource AccentColorBrush}">
     <Grid>
@@ -26,8 +26,10 @@
         <TextBox x:Name="txt_port" HorizontalAlignment="Left" Height="23" Margin="24,108,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>
         <Label Content="Password" HorizontalAlignment="Left" Margin="24,141,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
         <PasswordBox x:Name="txt_password" HorizontalAlignment="Left" Height="23" Margin="24,172,0,0" VerticalAlignment="Top" Width="217"/>
-        <Button x:Name="btn_AddServer_Save" Margin="24,288,22,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White" Width="217" Content="Save" Click="btn_AddServer_Save_Click"/>
+        <Button x:Name="btn_AddServer_Save" Margin="24,346,22,0" HorizontalAlignment="Center" VerticalAlignment="Top" Background="#FF1FAEFF" Foreground="White" Width="217" Content="Save" Click="btn_AddServer_Save_Click"/>
         <Label Content="Local Port" HorizontalAlignment="Left" Margin="24,203,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
         <TextBox x:Name="txt_localPort" HorizontalAlignment="Left" Height="23" Margin="24,234,0,0" TextWrapping="Wrap" Text="8100" VerticalAlignment="Top" Width="217"/>
+        <Label Content="Mode" HorizontalAlignment="Left" Margin="24,269,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
+        <ComboBox x:Name="cb_selectMode" HorizontalAlignment="Left" Margin="24,300,0,0" VerticalAlignment="Top" Width="217"/>
     </Grid>
 </metro:MetroWindow>

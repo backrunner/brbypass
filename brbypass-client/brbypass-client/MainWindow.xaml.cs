@@ -29,6 +29,7 @@ namespace brbypass_client
     {
         //window obj
         public static MainWindow mainWindow;
+        public static win_Log logWindow;
 
         //config path
         public static string startupPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -154,12 +155,26 @@ namespace brbypass_client
                     btn_test.IsEnabled = true;
                     averagePingDelay = averagePingDelay / successPingTest;
                     lbl_pingDelay.Content = ((int)averagePingDelay).ToString() + "ms";
+                    LogController.Debug("Send Ping to \"" + hostname + "\": "+ ((int)averagePingDelay).ToString() + "ms"+".");
                 }
                 else
                 {
                     lbl_pingDelay.Content = "Failed";
+                    LogController.Error("Send Ping to \"" + hostname + "\" Failed.");
                     btn_test.IsEnabled = true;
                 }
+            }
+        }
+
+        private void btn_log_Click(object sender, RoutedEventArgs e)
+        {
+            if (logWindow != null)
+            {
+                logWindow.Focus();
+            } else
+            {
+                logWindow = new win_Log();
+                logWindow.Show();
             }
         }
     }
