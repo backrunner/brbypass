@@ -64,6 +64,12 @@ namespace brbypass_client
                 server.password = txt_password.Password.Trim();
                 server.port = Convert.ToInt32(txt_port.Text.Trim()) ;
                 server.localPort = Convert.ToInt32(txt_localPort.Text.Trim());
+                switch (cb_selectMode.SelectedItem.ToString())
+                {
+                    case "HTTP":
+                        server.mode = 1;
+                        break;
+                }
                 //append the new one to array
                 Server[] new_servers = new Server[servers.Length + 1];
                 Array.Copy(servers, 0, new_servers, 0, servers.Length);
@@ -73,6 +79,7 @@ namespace brbypass_client
                 this.Close();
                 //add to mainWindow's combobox
                 MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
+                MainWindow.mainWindow.cb_selectServer.IsEnabled = true;
                 MainWindow.mainWindow.servers = new_servers;
             } else
             {
@@ -81,6 +88,12 @@ namespace brbypass_client
                 server.password = txt_password.Password.Trim();
                 server.port = Convert.ToInt32(txt_port.Text.Trim());
                 server.localPort = Convert.ToInt32(txt_localPort.Text.Trim());
+                switch (cb_selectMode.SelectedItem.ToString())
+                {
+                    case "HTTP":
+                        server.mode = 1;
+                        break;
+                }
                 //create array
                 Server[] servers = new Server[1];
                 servers[0] = server;
@@ -89,8 +102,16 @@ namespace brbypass_client
                 this.Close();
                 //Add to mainWindow's combobox
                 MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
+                MainWindow.mainWindow.cb_selectServer.IsEnabled = true;
                 MainWindow.mainWindow.servers = servers;
             }
+        }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            //set up combo box
+            cb_selectMode.Items.Add("HTTP");
+            cb_selectMode.SelectedIndex = 0;
         }
     }
 }

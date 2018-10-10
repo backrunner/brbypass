@@ -18,7 +18,7 @@
         mc:Ignorable="d"
         Title="Add New Proxy Server" Height="430.929" Width="270.732" Closed="MetroWindow_Closed"
         ResizeMode="NoResize" TitleForeground="White"
-        WindowTitleBrush="{DynamicResource AccentColorBrush}">
+        WindowTitleBrush="{DynamicResource AccentColorBrush}" Loaded="MetroWindow_Loaded">
     <Grid>
         <Label Content="Host" HorizontalAlignment="Left" Margin="24,17,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Width="71"/>
         <TextBox x:Name="txt_host" HorizontalAlignment="Left" Height="23" Margin="24,47,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="217"/>

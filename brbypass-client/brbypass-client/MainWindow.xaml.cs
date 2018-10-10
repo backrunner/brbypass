@@ -19,6 +19,7 @@ using Newtonsoft.Json.Linq;
 using brbypass_client.Model;
 using System.Net.NetworkInformation;
 using brbypass_client.Controller;
+using brbypass_client.Controller.Net;
 
 namespace brbypass_client
 {
@@ -41,6 +42,9 @@ namespace brbypass_client
         }
 
         public Server[] servers;
+
+        //net obj
+        private HttpProxy httpProxy;
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -66,14 +70,14 @@ namespace brbypass_client
                             using (StreamReader lastChoiceConfig = File.OpenText(startupPath + "config\\lastChoice.json"))
                             {
                                 using (JsonTextReader reader = new JsonTextReader(lastChoiceConfig))
-                                {
-                                    JObject o = (JObject)JToken.ReadFrom(reader);
+                                {                                    
                                     try
                                     {
+                                        JObject o = (JObject)JToken.ReadFrom(reader);
                                         lastchoice = (int)o["lastChoice"];
-                                    } catch (Exception err)
+                                    } catch (Exception ex)
                                     {
-                                        //do nothing
+                                        LogController.Error("Load last choice error: " + ex.Message);
                                     }
                                 }
                             }
@@ -130,12 +134,18 @@ namespace brbypass_client
             nowPingTest = 0;
             successPingTest = 0;
             //send ping
-            for (int i = 0; i < 8; i++)
+            if (cb_selectServer.SelectedIndex != -1)
             {
-                sendPingToHost(cb_selectServer.SelectedItem.ToString());
+                for (int i = 0; i < 8; i++)
+                {
+                    sendPingToHost(cb_selectServer.SelectedItem.ToString());
+                }
+                //disable button
+                btn_test.IsEnabled = false;
+            } else
+            {
+                lbl_pingDelay.Content = "Empty Item";
             }
-            //disable button
-            btn_test.IsEnabled = false;
         }
 
         private async void sendPingToHost(string hostname)
@@ -175,6 +185,35 @@ namespace brbypass_client
             {
                 logWindow = new win_Log();
                 logWindow.Show();
+            }
+        }
+
+        private void btn_start_Click(object sender, RoutedEventArgs e)
+        {
+            cb_selectServer.IsEnabled = false;
+            btn_start.Visibility = Visibility.Hidden;
+            btn_stop.Visibility = Visibility.Visible;
+            if (cb_selectServer.SelectedIndex != -1)
+            {
+                switch (servers[cb_selectServer.SelectedIndex].mode)
+                {
+                    case 1:
+                        httpProxy = new HttpProxy(servers[cb_selectServer.SelectedIndex].localPort);
+                        httpProxy.Start();
+                        break;
+                }
+            }
+        }
+        private void btn_stop_Click(object sender, RoutedEventArgs e)
+        {
+            cb_selectServer.IsEnabled = true;
+            btn_start.Visibility = Visibility.Visible;
+            btn_stop.Visibility = Visibility.Hidden;
+            switch (servers[cb_selectServer.SelectedIndex].mode)
+            {
+                case 1:
+                    httpProxy.Stop();
+                    break;
             }
         }
     }

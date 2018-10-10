@@ -86,6 +86,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controller\LogController.cs" />
+    <Compile Include="Controller\Net\HttpProxy.cs" />
     <Compile Include="Controller\ServerConfig.cs" />
     <Compile Include="Model\Log.cs" />
     <Compile Include="Model\Server.cs" />
@@ -144,6 +145,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.2.6\build\Fody.targets" Condition="Exists('..\packages\Fody.3.2.6\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

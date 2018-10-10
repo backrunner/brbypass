@@ -45,8 +45,8 @@ namespace brbypass_client
 
         private void appendLog(Log t)
         {
-            tb_log.Text += t.time + ": " + t.content + "\r\n";
-            sv_log.ScrollToBottom();
+            var update = new Action(() => {tb_log.Text += t.time + ": " + t.content + "\r\n"; sv_log.ScrollToBottom(); }); //调用TaskCompleted方法更新UI  
+            this.BeginInvoke(update);
         }
 
         private void btn_clear_Click(object sender, RoutedEventArgs e)
