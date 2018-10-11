@@ -1,0 +1,186 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using brbypass_client.Model.Net;
+using Newtonsoft.Json;
+
+namespace brbypass_client.Controller.Net
+{
+    public class TcpTunnel
+    {
+        //config
+        private string remoteHost;
+        private int remotePort;
+        private string cPassword;
+
+        //object
+        private TcpClient tunnel;
+        private NetworkStream stream;
+        private StreamWriter sw;
+
+        //event
+        public delegate void HandshakeSuccessHandler();
+        public event HandshakeSuccessHandler HandshakeSuccessEvent;
+        public delegate void AuthSuccessHandler();
+        public event AuthSuccessHandler AuthSuccessEvent;
+
+        public TcpTunnel(string host, int port, string password)
+        {
+            remoteHost = host;
+            remotePort = port;
+            cPassword = password;
+            //set up client
+            tunnel = new TcpClient();
+        }
+
+        public void Close()
+        {
+            stream.Close();
+            tunnel.Close();
+            MainWindow.mainWindow.updateUI_startFailed();
+        }
+
+        public void TryConnect()
+        {
+            LogController.Debug("Try to connect " + remoteHost + ":" + remotePort);
+            try
+            {
+                tunnel.Connect(remoteHost, remotePort);
+            }
+            catch (Exception ex)
+            {
+                LogController.Error("Connect to remote server error: " + ex.Message);
+                Close();
+            }
+            if (tunnel.Connected)
+            {
+                stream = tunnel.GetStream();
+                LogController.Debug("Server connected, now trying handshake");
+                //try handshake
+                stream.WriteTimeout = 3000;
+                stream.ReadTimeout = 3000;
+                if (stream.CanWrite)
+                {
+                    //use StreamWriter write handshake message to netstream
+                    using (sw = new StreamWriter(stream))
+                    {
+                        string data = JsonRequest.getString("handshake", "brbypasshandshake");
+                        sw.WriteLine(data);
+                        sw.Flush();
+                        if (stream.CanRead)
+                        {
+                            byte[] bytes = new byte[tunnel.ReceiveBufferSize];
+                            try
+                            {
+                                stream.Read(bytes, 0, tunnel.ReceiveBufferSize);                                
+                            }
+                            catch (IOException tex)
+                            {
+                                LogController.Error("Read data timeout: " + tex.Message);
+                                Close();
+                            }
+                            JsonResponse jsonResponse = new JsonResponse();
+                            try
+                            {
+                                //get handshake response
+                                string response = Encoding.UTF8.GetString(bytes).Trim();                                
+                                jsonResponse = JsonConvert.DeserializeObject<JsonResponse>(response);
+                            }                            
+                            catch (Exception ex)
+                            {
+                                LogController.Error("Resolve handshake response error: " + ex.Message);
+                                Close();
+                            }
+                            if (jsonResponse.status == "success")
+                            {
+                                LogController.Debug("Received handshake response");
+                                HandshakeSuccessEvent?.Invoke();
+                            }
+                        }
+                        else
+                        {
+                            LogController.Error("Cannot read data from stream");
+                            Close();
+                        }
+                    }                       
+                }
+                else
+                {
+                    LogController.Error("Cannot write data to stream");
+                    Close();
+                }
+            } else
+            {
+                LogController.Error("Connection error");
+                Close();
+            }
+        }
+
+        public void TryAuth()
+        {
+            if (tunnel.Connected)
+            {
+                LogController.Debug("Trying to send auth");
+                //try send auth
+                if (stream.CanWrite)
+                {
+                    sw.WriteLine(JsonRequest.getString("auth", cPassword));
+                    sw.Flush();
+                    if (stream.CanRead)
+                    {
+                        byte[] bytes = new byte[tunnel.ReceiveBufferSize];
+                        try
+                        {
+                            stream.Read(bytes, 0, tunnel.ReceiveBufferSize);
+                        }
+                        catch (IOException tex)
+                        {
+                            LogController.Error("Read data timeout: " + tex.Message);
+                            Close();
+                        }
+                        JsonResponse jsonResponse = new JsonResponse();
+                        try
+                        {
+                            //get auth response
+                            string response = Encoding.UTF8.GetString(bytes).Trim();
+                            jsonResponse = JsonConvert.DeserializeObject<JsonResponse>(response);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogController.Error("Resolve auth response error: " + ex.Message);
+                            
+                        }
+                        if (jsonResponse.status == "success")
+                        {
+                            LogController.Debug("Auth success");
+                            AuthSuccessEvent?.Invoke();
+                        } else
+                        {
+                            LogController.Debug("Auth failed");
+                            Close();
+                        }
+                    }
+                    else
+                    {
+                        LogController.Error("Cannot read data from stream");
+                        Close();
+                    }
+                } else
+                {
+                    LogController.Error("Cannot write auth data to stream");
+                    Close();
+                }
+            } else
+            {
+                LogController.Error("Connection is break");
+                Close();
+            }
+        }
+
+
+    }
+}

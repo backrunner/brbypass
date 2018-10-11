@@ -8,6 +8,7 @@
 *.pdb
 *.vcproj.*.user
 *.suo
+*.pyc
 ._*
 [Dd]ebug
 [Rr]elease

@@ -24,7 +24,5 @@ namespace brbypass_client.Controller
                 }
             }
         }
-
-        
     }
 }

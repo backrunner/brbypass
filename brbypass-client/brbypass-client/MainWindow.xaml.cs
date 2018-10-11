@@ -191,19 +191,33 @@ namespace brbypass_client
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
             cb_selectServer.IsEnabled = false;
-            btn_start.Visibility = Visibility.Hidden;
-            btn_stop.Visibility = Visibility.Visible;
+            btn_start.IsEnabled = false;
             if (cb_selectServer.SelectedIndex != -1)
             {
                 switch (servers[cb_selectServer.SelectedIndex].mode)
                 {
                     case 1:
-                        httpProxy = new HttpProxy(servers[cb_selectServer.SelectedIndex].localPort);
+                        int selectedIndex = cb_selectServer.SelectedIndex;
+                        httpProxy = new HttpProxy(servers[selectedIndex].localPort, servers[selectedIndex].host, servers[selectedIndex].port, servers[selectedIndex].password);
                         httpProxy.Start();
                         break;
                 }
             }
         }
+
+        //ui update method
+        public void updateUI_startFailed()
+        {
+            var update = new Action(() => { btn_start.IsEnabled = true; });
+            this.BeginInvoke(update);
+        }
+
+        public void updateUI_startSucceed()
+        {
+            var update = new Action(() => { btn_start.IsEnabled = true; btn_start.Visibility = Visibility.Hidden;btn_stop.Visibility = Visibility.Visible; });
+            this.BeginInvoke(update);
+        }
+
         private void btn_stop_Click(object sender, RoutedEventArgs e)
         {
             cb_selectServer.IsEnabled = true;
