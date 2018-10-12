@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using brbypass_client.Model.Net;
+using brbypass_client.Util;
 using Newtonsoft.Json;
 
 namespace brbypass_client.Controller.Net
@@ -35,11 +36,39 @@ namespace brbypass_client.Controller.Net
             cPassword = password;
             //set up client
             tunnel = new TcpClient();
+            tunnel.Client.IOControl(IOControlCode.KeepAliveValues, KeepAlive(1, 30000, 10000), null);
+        }
+
+        public bool IsOnline(TcpClient c)
+        {
+            bool result = false;
+            try
+            {
+                result = !((c.Client.Poll(1000, SelectMode.SelectRead) && (c.Client.Available == 0)) || !c.Client.Connected);
+            }
+            catch (Exception ex)
+            {
+                LogController.Error("Check socket status error: " + ex.Message);
+                Close();
+            }
+            return result;
+        }
+
+        private byte[] KeepAlive(int onOff, int keepAliveTime, int keepAliveInterval)
+        {
+            byte[] buffer = new byte[12];
+            BitConverter.GetBytes(onOff).CopyTo(buffer, 0);
+            BitConverter.GetBytes(keepAliveTime).CopyTo(buffer, 4);
+            BitConverter.GetBytes(keepAliveInterval).CopyTo(buffer, 8);
+            return buffer;
         }
 
         public void Close()
         {
-            stream.Close();
+            if (stream != null)
+            {
+                stream.Close();
+            }
             tunnel.Close();
             MainWindow.mainWindow.updateUI_startFailed();
         }
@@ -56,7 +85,7 @@ namespace brbypass_client.Controller.Net
                 LogController.Error("Connect to remote server error: " + ex.Message);
                 Close();
             }
-            if (tunnel.Connected)
+            if (IsOnline(tunnel))
             {
                 stream = tunnel.GetStream();
                 LogController.Debug("Server connected, now trying handshake");
@@ -76,7 +105,7 @@ namespace brbypass_client.Controller.Net
                             byte[] bytes = new byte[tunnel.ReceiveBufferSize];
                             try
                             {
-                                stream.Read(bytes, 0, tunnel.ReceiveBufferSize);                                
+                                stream.Read(bytes, 0, tunnel.ReceiveBufferSize);
                             }
                             catch (IOException tex)
                             {
@@ -87,9 +116,9 @@ namespace brbypass_client.Controller.Net
                             try
                             {
                                 //get handshake response
-                                string response = Encoding.UTF8.GetString(bytes).Trim();                                
+                                string response = Encoding.UTF8.GetString(bytes).Trim();
                                 jsonResponse = JsonConvert.DeserializeObject<JsonResponse>(response);
-                            }                            
+                            }
                             catch (Exception ex)
                             {
                                 LogController.Error("Resolve handshake response error: " + ex.Message);
@@ -106,14 +135,15 @@ namespace brbypass_client.Controller.Net
                             LogController.Error("Cannot read data from stream");
                             Close();
                         }
-                    }                       
+                    }
                 }
                 else
                 {
                     LogController.Error("Cannot write data to stream");
                     Close();
                 }
-            } else
+            }
+            else
             {
                 LogController.Error("Connection error");
                 Close();
@@ -122,7 +152,7 @@ namespace brbypass_client.Controller.Net
 
         public void TryAuth()
         {
-            if (tunnel.Connected)
+            if (IsOnline(tunnel))
             {
                 LogController.Debug("Trying to send auth");
                 //try send auth
@@ -152,13 +182,14 @@ namespace brbypass_client.Controller.Net
                         catch (Exception ex)
                         {
                             LogController.Error("Resolve auth response error: " + ex.Message);
-                            
+
                         }
                         if (jsonResponse.status == "success")
                         {
                             LogController.Debug("Auth success");
                             AuthSuccessEvent?.Invoke();
-                        } else
+                        }
+                        else
                         {
                             LogController.Debug("Auth failed");
                             Close();
@@ -169,18 +200,130 @@ namespace brbypass_client.Controller.Net
                         LogController.Error("Cannot read data from stream");
                         Close();
                     }
-                } else
+                }
+                else
                 {
                     LogController.Error("Cannot write auth data to stream");
                     Close();
                 }
-            } else
+            }
+            else
             {
                 LogController.Error("Connection is break");
                 Close();
             }
         }
 
+        public void sendHttpContent(string request, NetworkStream clientStream)
+        {
+            if (IsOnline(tunnel))
+            {
+                if (stream.CanWrite)
+                {
+                    sw.WriteLine(JsonRequest.getString("http", request));
+                    sw.Flush();
+                    if (stream.CanRead)
+                    {
+                        byte[] buffer = new byte[tunnel.ReceiveBufferSize];
+                        try
+                        {
+                            stream.Read(buffer, 0, tunnel.ReceiveBufferSize);
+                            if (buffer.Length > 0)
+                            {
+                                string response = Encoding.UTF8.GetString(buffer).Trim();
+                                JsonResponse jsonResponse = new JsonResponse();
+                                try
+                                {
+                                    jsonResponse = JsonConvert.DeserializeObject<JsonResponse>(response);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogController.Error("Resolve stream response error: " + ex.Message);
+                                    return;
+                                }
+                                byte[] content;
+                                switch (jsonResponse.type)
+                                {
+                                    case "http":
+                                        while (jsonResponse.status != "end")
+                                        {
+                                            content = HexUtil.HexToByte(jsonResponse.content);
+                                            if (clientStream.CanWrite)
+                                            {
+                                                clientStream.Write(content, 0, content.Length);                                                
+                                            }
+                                            else
+                                            {
+                                                LogController.Error("Cannot write data to local client stream");
+                                                return;
+                                            }
 
+                                            //read next package
+                                            stream.Read(buffer, 0, tunnel.ReceiveBufferSize);
+                                            response = Encoding.UTF8.GetString(buffer).Trim();
+                                            if (buffer.Length > 0)
+                                            {
+                                                try
+                                                {
+                                                    jsonResponse = JsonConvert.DeserializeObject<JsonResponse>(response);
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    LogController.Error("Resolve stream response error: " + ex.Message);
+                                                    return;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                LogController.Warn("Stream received empty response");
+                                                return;
+                                            }
+                                        }
+                                        clientStream.Flush();
+                                        break;
+                                    case "httpconnect":
+                                        content = Encoding.UTF8.GetBytes(jsonResponse.content+"\r\n\r\n");
+                                        if (clientStream.CanWrite)
+                                        {
+                                            clientStream.Write(content, 0, content.Length);
+                                            clientStream.Flush();
+                                        }
+                                        else
+                                        {
+                                            LogController.Error("Cannot write data to local client stream");
+                                            return;
+                                        }
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                LogController.Warn("Stream received empty response");
+                                return;
+                            }
+                        }
+                        catch (SocketException ex)
+                        {
+                            LogController.Error("Stream IO socket exception: " + ex.Message);
+                            Close();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogController.Error("Stream IO error: " + ex.Message);
+                        }
+                    }
+                }
+                else
+                {
+                    LogController.Error("Cannot write data to remote stream");
+                    Close();
+                }
+            }
+            else
+            {
+                LogController.Error("Connection is break");
+                Close();
+            }
+        }
     }
 }

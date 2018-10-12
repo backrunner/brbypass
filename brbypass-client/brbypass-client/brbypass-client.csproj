@@ -93,6 +93,7 @@
     <Compile Include="Model\Net\JsonRequest.cs" />
     <Compile Include="Model\Net\JsonResponse.cs" />
     <Compile Include="Model\Server.cs" />
+    <Compile Include="Util\HexUtil.cs" />
     <Compile Include="win_addProxyServer.xaml.cs">
       <DependentUpon>win_addProxyServer.xaml</DependentUpon>
     </Compile>
