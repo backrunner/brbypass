@@ -58,11 +58,12 @@ namespace brbypass_client.Controller.Net
         }
 
         public void Stop()
-        {
+        {          
+            _tunnel.CloseTunnel();
             _listener.Stop();
-            _tunnel.Close();
             serverThread.Abort();
             serverThread.Join();
+            MainWindow.mainWindow.updateUI_startFailed();
         }
 
         private void Server(TcpListener listener)
@@ -72,8 +73,8 @@ namespace brbypass_client.Controller.Net
                 while (true)
                 {
                     TcpClient client = listener.AcceptTcpClient();
-                    //while (!ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessClient), client)) ;
-                    ProcessClient(client);
+                    while (!ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessClient), client)) ;
+                    //ProcessClient(client);
                 }
             }
             catch(ThreadAbortException)
@@ -86,6 +87,20 @@ namespace brbypass_client.Controller.Net
             }
         }
 
+        public bool IsOnline(TcpClient c)
+        {
+            bool result = false;
+            try
+            {
+                result = !((c.Client.Poll(1000, SelectMode.SelectRead) && (c.Client.Available == 0)) || !c.Client.Connected);
+            }
+            catch (Exception ex)
+            {
+                LogController.Error("Check socket status error: " + ex.Message);
+            }
+            return result;
+        }
+
         private void ProcessClient(object obj)
         {
             TcpClient client = (TcpClient)obj;
@@ -93,7 +108,7 @@ namespace brbypass_client.Controller.Net
             client.Client.IOControl(IOControlCode.KeepAliveValues, KeepAlive(1, 30000, 10000), null);
             try
             {
-                while (client.Connected)
+                while (IsOnline(client))
                 {
                     ProcessPacket(clientStream);
                 }

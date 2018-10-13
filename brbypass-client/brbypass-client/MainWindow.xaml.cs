@@ -44,7 +44,7 @@ namespace brbypass_client
         public Server[] servers;
 
         //net obj
-        private HttpProxy httpProxy;
+        public HttpProxy httpProxy;
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -191,7 +191,9 @@ namespace brbypass_client
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
             cb_selectServer.IsEnabled = false;
+            //lock buttons
             btn_start.IsEnabled = false;
+            btn_stop.IsEnabled = false;
             if (cb_selectServer.SelectedIndex != -1)
             {
                 switch (servers[cb_selectServer.SelectedIndex].mode)
@@ -208,19 +210,28 @@ namespace brbypass_client
         //ui update method
         public void updateUI_startFailed()
         {
-            var update = new Action(() => { btn_start.IsEnabled = true; });
+            var update = new Action(() => {
+                btn_start.IsEnabled = true;                
+                btn_stop.Visibility = Visibility.Hidden;
+                btn_start.Visibility = Visibility.Visible;
+            });
             this.BeginInvoke(update);
         }
 
         public void updateUI_startSucceed()
         {
-            var update = new Action(() => { btn_start.IsEnabled = true; btn_start.Visibility = Visibility.Hidden;btn_stop.Visibility = Visibility.Visible; });
+            var update = new Action(() => {                
+                btn_start.Visibility = Visibility.Hidden;
+                btn_stop.Visibility = Visibility.Visible;
+                btn_stop.IsEnabled = true;
+            });
             this.BeginInvoke(update);
         }
 
         private void btn_stop_Click(object sender, RoutedEventArgs e)
         {
             cb_selectServer.IsEnabled = true;
+            btn_start.IsEnabled = true;
             btn_start.Visibility = Visibility.Visible;
             btn_stop.Visibility = Visibility.Hidden;
             switch (servers[cb_selectServer.SelectedIndex].mode)
