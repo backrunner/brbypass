@@ -103,14 +103,13 @@ namespace brbypass_client.Controller.Net
 
         private void ProcessClient(object obj)
         {
-            TcpClient client = (TcpClient)obj;
-            NetworkStream clientStream = client.GetStream();
+            TcpClient client = (TcpClient)obj;            
             client.Client.IOControl(IOControlCode.KeepAliveValues, KeepAlive(1, 30000, 10000), null);
             try
             {
                 while (IsOnline(client))
                 {
-                    ProcessPacket(clientStream);
+                    ProcessPacket(client);
                 }
             } catch(Exception ex)
             {
@@ -130,13 +129,14 @@ namespace brbypass_client.Controller.Net
             return buffer;
         }
 
-        private void ProcessPacket(NetworkStream clientStream)
-        {            
+        private void ProcessPacket(TcpClient client)
+        {
+            Stream clientStream = client.GetStream();
             try
             {
                 StringBuilder packet = new StringBuilder();
                 if (clientStream.CanRead) {
-                    while (clientStream.DataAvailable)
+                    while (((NetworkStream)clientStream).DataAvailable)
                     {
                         byte[] buffer = new byte[1024];
                         clientStream.Read(buffer, 0, 1024);
@@ -144,7 +144,11 @@ namespace brbypass_client.Controller.Net
                     }
                     if (packet.Length > 0)
                     {
-                        _tunnel.sendHttpContent(packet.ToString().Trim(), clientStream);
+                        clientStream = _tunnel.sendHttpContent(packet.ToString(), clientStream);
+                        if (clientStream == null)
+                        {
+                            Stop();
+                        }
                     }
                 } else
                 {

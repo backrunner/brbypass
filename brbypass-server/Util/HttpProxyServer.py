@@ -1,8 +1,4 @@
-import os
-import socketserver
-import json
-import http.client
-import asyncio
+import os, socketserver, json, http.client, asyncio, socket
 from Controller import Config, Log
 from Util import HttpDumper
 
@@ -20,19 +16,30 @@ class HttpProxyHandler(socketserver.StreamRequestHandler):
             data = None
             data_resolved = None
             try:
-                data = self.rfile.readline().strip()
-                if data:
-                    try:
-                        data_resolved = json.loads(data, encoding="utf8")
-                    except ValueError:
-                        Log.error('Cannot resolve request')
-                        continue
+                headerBuffer = self.rfile.read(6)
+                if len(header)>0:
+                    contentLength = -1
+                    if headerBuffer[:4] == b'brbp':
+                        lengthBytes = headerBuffer[4:6]
+                        contentLength = int.from_bytes(lengthBytes,byteorder='big')
+                    if contentLength > -1:
+                        data = self.rfile.read(contentLength)
+                        if len(data)>0:
+                            #Log.info(data.decode())
+                            try:
+                                data_resolved = json.loads(data.decode(), encoding="utf8")
+                            except ValueError:
+                                Log.error('Cannot resolve request')
+                                continue
+                        else:
+                            continue
+                    else:
+                        return
                 else:
                     continue
-            except:
-                Log.error('Read request error')
+            except Exception as ex:
+                Log.error('Read request error: ' + str(ex))
                 return
-            Log.debug(str(data_resolved))
             if (data_resolved['type'] == 'handshake'):
                 Log.debug("Got handshake: " + self.client_address[0])
                 response = {
@@ -84,44 +91,63 @@ class HttpProxyHandler(socketserver.StreamRequestHandler):
                 #get event loop
                 loop = asyncio.get_event_loop()
                 if (fisrtLine[0] == 'CONNECT'):
-                    Log.info("Loop start")
-                    loop.run_until_complete(self.do_CONNECT())
-                    Log.info("Loop end")
+                    loop.run_until_complete(self.do_CONNECT(fisrtLine[1]))
                 elif (fisrtLine[0] == 'GET'):
-                    Log.info("Loop start")
                     loop.run_until_complete(self.do_GET(fisrtLine[1],HttpDumper.GetHost(packet)))
-                    Log.info("Loop end")
 
-    async def do_CONNECT(self):
-        jsonObj = {
-            'type':'httpconnect',
-            'status':'ok',
-            'content': "HTTP/1.1 200 Connection established"
-        }
-        header = b'\x62\x72\x62\x70'
-        resBuffer = bytes(json.dumps(jsonObj), encoding = "utf8")
-        bytesLength = (len(resBuffer)).to_bytes(2,byteorder='big')
-        self.wfile.write(header+bytesLength+resBuffer)
+    async def do_CONNECT(self,address):
+        if address.split(':')[1] == '443':
+            jsonObj = {
+                'type':'httpsconnect',
+                'status':'ok',
+                'content': "HTTP/1.1 200 Connection established"
+            }
+            header = b'\x62\x72\x62\x70'
+            resBuffer = bytes(json.dumps(jsonObj), encoding = "utf8")
+            bytesLength = (len(resBuffer)).to_bytes(2,byteorder='big')
+            try:
+                self.wfile.write(header+bytesLength+resBuffer)
+            except ConnectionResetError:
+                self.finish()
+                return
+        else:
+            jsonObj = {
+                'type':'httpconnect',
+                'status':'ok',
+                'content': "HTTP/1.1 200 Connection established"
+            }
+            header = b'\x62\x72\x62\x70'
+            resBuffer = bytes(json.dumps(jsonObj), encoding = "utf8")
+            bytesLength = (len(resBuffer)).to_bytes(2,byteorder='big')
+            self.wfile.write(header+bytesLength+resBuffer)
 
     async def do_GET(self,address,host):
         header = b'\x62\x72\x62\x70'
-        conn = http.client.HTTPConnection(host)
+        conn = http.client.HTTPConnection(host,timeout=3)
         conn.request('GET',address)
-        response = conn.getresponse()
-        #write response to local server
-        while not response.closed:
-            r = response.read(2048)
-            if len(r)>0:
-                jsonObj = {
-                    'type':'http',
-                    'status':'notend',
-                    'content': r.hex()
-                }
-                resBuffer = bytes(json.dumps(jsonObj), encoding = "utf8")
-                bytesLength = (len(resBuffer)).to_bytes(2,byteorder='big')
-                self.wfile.write(header+bytesLength+resBuffer)
-            else:
-                response.close()
+        try:
+            response = conn.getresponse()
+            #write response to local server
+            while not response.closed:
+                r = response.read(2048)
+                if len(r)>0:
+                    jsonObj = {
+                        'type':'http',
+                        'status':'notend',
+                        'content': r.hex()
+                    }
+                    resBuffer = bytes(json.dumps(jsonObj), encoding = "utf8")
+                    bytesLength = (len(resBuffer)).to_bytes(2,byteorder='big')
+                    Log.info("====bytesLength: " + str(len(resBuffer)))
+                    try:
+                        self.wfile.write(header+bytesLength+resBuffer)
+                    except ConnectionResetError:
+                        self.finish()
+                        return
+                else:
+                    response.close()
+        except socket.timeout:
+            Log.error("Stream socket timeout")
         jsonObj = {
             'type':'http',
             'status':'end'

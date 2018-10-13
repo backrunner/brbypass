@@ -3,7 +3,7 @@ def GetMethod(packet):
 
 def GetFirstLine(packet):
     firstLine = packet.split('\r\n',1)[0]
-    return firstLine.split(' ',2)
+    return firstLine.split(' ')
 
 def GetHost(packet):
     lines = packet.split('\r\n')

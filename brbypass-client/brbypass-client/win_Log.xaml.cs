@@ -38,7 +38,10 @@ namespace brbypass_client
             for (int i = 0; i < LogController.logs.Count; i++)
             {
                 Log t = (Log)LogController.logs[i];
-                tb_log.Text += t.time + ": " + t.content + "\r\n";
+                if (t != null)
+                {
+                    tb_log.Text += t.time + ": " + t.content + "\r\n";
+                }
             }
             sv_log.ScrollToBottom();
         }
@@ -61,7 +64,10 @@ namespace brbypass_client
             for (int i = 0; i < LogController.logs.Count; i++)
             {
                 Log t = (Log)LogController.logs[i];
-                tb_log.Text += t.time + ": " + t.content + "\r\n";
+                if (t != null)
+                {
+                    tb_log.Text += t.time + ": " + t.content + "\r\n";
+                }
             }
             sv_log.ScrollToBottom();
         }
