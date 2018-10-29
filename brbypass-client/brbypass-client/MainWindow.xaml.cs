@@ -44,7 +44,7 @@ namespace brbypass_client
         public Server[] servers;
 
         //net obj
-        public HttpProxy httpProxy;
+        private SocksServer socksServer;
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -189,21 +189,29 @@ namespace brbypass_client
         }
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
-        {
-            cb_selectServer.IsEnabled = false;
-            //lock buttons
-            btn_start.IsEnabled = false;
-            btn_stop.IsEnabled = false;
+        {            
             if (cb_selectServer.SelectedIndex != -1)
             {
-                switch (servers[cb_selectServer.SelectedIndex].mode)
+                cb_selectServer.IsEnabled = false;
+                //lock buttons
+                btn_start.IsEnabled = false;
+                btn_stop.IsEnabled = false;
+                //ping remote server
+                Ping ping = new Ping();
+                PingReply reply = ping.Send(servers[cb_selectServer.SelectedIndex].host, 1000);
+                if (reply.Status == IPStatus.Success)
                 {
-                    case 1:
-                        int selectedIndex = cb_selectServer.SelectedIndex;
-                        httpProxy = new HttpProxy(servers[selectedIndex].localPort, servers[selectedIndex].host, servers[selectedIndex].port, servers[selectedIndex].password);
-                        httpProxy.Start();
-                        break;
-                }
+                    switch (servers[cb_selectServer.SelectedIndex].mode)
+                    {
+                        case 1:
+                            socksServer = new SocksServer((ushort)servers[cb_selectServer.SelectedIndex].localPort);
+                            socksServer.Start(servers[cb_selectServer.SelectedIndex].host, servers[cb_selectServer.SelectedIndex].port, servers[cb_selectServer.SelectedIndex].password);
+                            break;
+                    }
+                } else
+                {
+                    updateUI_startFailed();
+                }                
             }
         }
 
@@ -237,7 +245,7 @@ namespace brbypass_client
             switch (servers[cb_selectServer.SelectedIndex].mode)
             {
                 case 1:
-                    httpProxy.Stop();
+                    socksServer.Stop();
                     break;
             }
         }

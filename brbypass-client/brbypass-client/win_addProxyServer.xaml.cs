@@ -66,7 +66,7 @@ namespace brbypass_client
                 server.localPort = Convert.ToInt32(txt_localPort.Text.Trim());
                 switch (cb_selectMode.SelectedItem.ToString())
                 {
-                    case "HTTP":
+                    case "Socks":
                         server.mode = 1;
                         break;
                 }
@@ -90,7 +90,7 @@ namespace brbypass_client
                 server.localPort = Convert.ToInt32(txt_localPort.Text.Trim());
                 switch (cb_selectMode.SelectedItem.ToString())
                 {
-                    case "HTTP":
+                    case "Socks":
                         server.mode = 1;
                         break;
                 }
@@ -110,7 +110,7 @@ namespace brbypass_client
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //set up combo box
-            cb_selectMode.Items.Add("HTTP");
+            cb_selectMode.Items.Add("Socks");
             cb_selectMode.SelectedIndex = 0;
         }
     }

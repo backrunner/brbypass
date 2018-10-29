@@ -30,16 +30,16 @@ color = Colored()
 
 def info(content):
     nowtime = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    print(color.green("[Info]"+nowtime+": "+content))
+    print(color.green("[Info]  "+nowtime+":\t"+content),end="\r\n")
 
 def debug(content):
     nowtime = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    print(color.white("[Debug]"+nowtime+": "+content))
+    print(color.white("[Debug] "+nowtime+":\t"+content),end="\r\n")
 
 def warn(content):
     nowtime = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    print(color.yellow("[Warning]"+nowtime+": "+content))
+    print(color.yellow("[Warn]  "+nowtime+":\t"+content),end="\r\n")
 
 def error(content):
     nowtime = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    print(color.red("[Error]"+nowtime+": "+content))
+    print(color.red("[Error] "+nowtime+":\t"+content),end="\r\n")

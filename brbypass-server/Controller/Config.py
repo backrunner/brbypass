@@ -47,5 +47,5 @@ def load():
 
 def configModeCheck(mode):
     return {
-        'http':1
+        'socks':1
     }.get(mode,-1)

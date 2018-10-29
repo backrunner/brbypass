@@ -86,15 +86,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controller\LogController.cs" />
-    <Compile Include="Controller\Net\HttpProxy.cs" />
+    <Compile Include="Controller\Net\SocksConnection.cs" />
+    <Compile Include="Controller\Net\SocksServer.cs" />
     <Compile Include="Controller\Net\TcpTunnel.cs" />
     <Compile Include="Controller\ServerConfig.cs" />
     <Compile Include="Model\Log.cs" />
     <Compile Include="Model\Net\JsonRequest.cs" />
     <Compile Include="Model\Net\JsonResponse.cs" />
-    <Compile Include="Model\Net\Protocol.cs" />
+    <Compile Include="Model\Net\TunnelConfig.cs" />
     <Compile Include="Model\Server.cs" />
-    <Compile Include="Util\HexUtil.cs" />
+    <Compile Include="Utils\HexUtils.cs" />
+    <Compile Include="Utils\SocketUtils.cs" />
     <Compile Include="win_addProxyServer.xaml.cs">
       <DependentUpon>win_addProxyServer.xaml</DependentUpon>
     </Compile>

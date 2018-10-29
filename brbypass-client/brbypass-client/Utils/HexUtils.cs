@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace brbypass_client.Util
 {
-    public class HexUtil
+    public class HexUtils
     {
         public static byte[] HexToByte(string s)
         {
