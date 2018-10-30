@@ -1,10 +1,11 @@
 import datetime
+from queue import Queue
+
 # -----------------colorama模块的一些常量---------------------------
 # Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 # Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 # Style: DIM, NORMAL, BRIGHT, RESET_ALL
 #
-
 from colorama import init, Fore, Back, Style
 init(autoreset=True)
 class Colored(object):

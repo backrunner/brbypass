@@ -51,7 +51,9 @@ namespace brbypass_client.Controller.Net
                  */
 
                 byte[] password = Encoding.UTF8.GetBytes(Password);
-                byte[] auth = new byte[] { 0x07,0x02, 0x01, (byte)password.Length};
+                byte[] b_pwdLength = BitConverter.GetBytes(password.Length);
+                byte[] auth = new byte[] { 0x07,0x02, 0x01, b_pwdLength[0]};
+                
 
                 byte[] request = new byte[auth.Length + password.Length];
                 auth.CopyTo(request, 0);

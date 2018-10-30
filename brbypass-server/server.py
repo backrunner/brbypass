@@ -9,10 +9,9 @@ version = "0.1 Reborn"
 #main execute
 if __name__ == "__main__":
     Log.info("Starting brbypass ["+version+"]...")
-    config = Config.load()
-    Log.debug("Config: "+config.host+":"+str(config.port)+" @ \""+config.password+"\" % "+config.mode)
+    Log.debug("Config: "+Config.config.host+":"+str(Config.config.port)+" @ \""+Config.config.password+"\" % "+Config.config.mode)
 
     #mode change
-    if config.mode == "socks":
-        proxyServer = SocksProxy.SocksProxyServer(config.host,config.port)
+    if Config.config.mode == "socks":
+        proxyServer = SocksProxy.SocksProxyServer(Config.config.host,Config.config.port)
         proxyServer.start()

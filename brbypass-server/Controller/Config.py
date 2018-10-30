@@ -49,3 +49,5 @@ def configModeCheck(mode):
     return {
         'socks':1
     }.get(mode,-1)
+
+config = load()

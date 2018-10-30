@@ -146,7 +146,7 @@ namespace brbypass_client.Controller.Net
                     }
                     catch (Exception e)
                     {
-                        LogController.Error("Find some error on socks connection: " + e.Message);
+                        LogController.Error("Find some error on start receive: " + e.Message);
                         this.Close();
                     }
                 }
@@ -237,7 +237,7 @@ namespace brbypass_client.Controller.Net
                                 Array.Copy(_ClientBuffer, 0, sendBuffer, 12, size);
                                 break;
                             case 3:
-                                sendBuffer[3] = 0x03;
+                                sendBuffer[5] = 0x03;
                                 //little endian
                                 byte[] b_domainlen = BitConverter.GetBytes(b_domain.Length);
                                 sendBuffer[6] = b_domainlen[0];
@@ -247,7 +247,7 @@ namespace brbypass_client.Controller.Net
                                 sendBuffer[9] = b_port[1];
                                 b_domain.CopyTo(sendBuffer, 10);
                                 //Copy real data to the end of sendBuffer
-                                Array.Copy(_ClientBuffer, 0, sendBuffer, 9+b_domain.Length, size);
+                                Array.Copy(_ClientBuffer, 0, sendBuffer, 10+b_domain.Length, size);
                                 break;
                             case 5:
                                 sendBuffer[5] = 0x05;
@@ -275,7 +275,7 @@ namespace brbypass_client.Controller.Net
                 }
                 catch (Exception e)
                 {
-                    LogController.Debug("Find some error on socks connection: " + e.Message);
+                    LogController.Debug("Found some error on send data to tunnel: " + e.Message);
                     this.Close();
                 }
             }
@@ -292,16 +292,29 @@ namespace brbypass_client.Controller.Net
                     int size = socket.EndReceive(result, out error);
                     if (size > 0)
                     {
-                        SocketUtils.Send(Client, _ProxyBuffer, 0, size);
-                        if (this.Server.IsStarted)
+                        // Recv Buffer
+                        //  0     1     2    3 - 4    5 - ?
+                        // 0x06  0x03  CMD  LENGTH    DATA
+                        // CMD: 0x04 - TCP Response
+                        if (_ProxyBuffer[0] == 0x06 && _ProxyBuffer[1] == 0x03 && _ProxyBuffer[2] == 0x04)
                         {
-                            socket.BeginReceive(_ProxyBuffer, 0, _ProxyBuffer.Length, SocketFlags.None, this.OnProxyReceive, socket);
-                        }
+                            int contentLength = BitConverter.ToInt16(_ProxyBuffer, 3);
+                            byte[] content = new byte[contentLength];
+                            Array.Copy(_ProxyBuffer, 5, content, 0, contentLength);
+                            SocketUtils.Send(Client, content, 0, contentLength);
+                            if (this.Server.IsStarted)
+                            {
+                                socket.BeginReceive(_ProxyBuffer, 0, _ProxyBuffer.Length, SocketFlags.None, this.OnProxyReceive, socket);
+                            }
+                        } else
+                        {
+                            LogController.Debug("Receive a wrong header packet.");
+                            this.Close();
+                        }                        
                     }
                 }
                 catch (Exception e)
                 {
-                    LogController.Debug("Find some error on socks connection: " + e.Message);
                     this.Close();
                 }
             }
@@ -429,6 +442,7 @@ namespace brbypass_client.Controller.Net
                                     IPAddress[] addresses = Dns.GetHostAddresses(address);
                                     if (addresses.Length != 0)
                                     {
+                                        ipAddress = addresses[0];
                                         this.Address = address;
                                     }
                                     else
@@ -467,7 +481,6 @@ namespace brbypass_client.Controller.Net
                         this.RemotePort = BitConverter.ToUInt16(buffer, 0);
                     }
                     rep = 0x00;
-                    LogController.Debug("Get socks connection: " + this.RemoteEndPoint.ToString());
                 }
             }
 
@@ -484,7 +497,7 @@ namespace brbypass_client.Controller.Net
             stream.Write(localPort, 0, localPort.Length);
             SocketUtils.Send(this.Client, stream.ToArray());
 
-            return (this.RemoteEndPoint != null || this.Address.Length>0);
+            return (this.RemoteEndPoint != null || this.Address != null);
         }
     }
 }
