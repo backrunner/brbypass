@@ -152,6 +152,7 @@ namespace brbypass_client.Controller.Net
                 }
                 else
                 {
+                    LogController.Error("Failed to establish proxy tunnel.");
                     this.Close();
                 }
             }
@@ -483,7 +484,7 @@ namespace brbypass_client.Controller.Net
             stream.Write(localPort, 0, localPort.Length);
             SocketUtils.Send(this.Client, stream.ToArray());
 
-            return (this.RemoteEndPoint != null);
+            return (this.RemoteEndPoint != null || this.Address.Length>0);
         }
     }
 }
