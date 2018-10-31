@@ -14,7 +14,7 @@ namespace brbypass_client.Controller.Net
 {
     class SocksConnection
     {
-        public SocksConnection(SocksServer server, Socket client,TunnelConfig tcpTunnelConfig)
+        public SocksConnection(SocksServer server, Socket client, TunnelConfig tcpTunnelConfig)
         {
             this.Server = server;
             this.Client = client;
@@ -105,7 +105,14 @@ namespace brbypass_client.Controller.Net
             }
             if (this.Proxy != null)
             {
-                LogController.Debug("Socks proxy connection closed: " + this.Proxy.Client.RemoteEndPoint.ToString());
+                if (this.Proxy.Client.RemoteEndPoint != null)
+                {
+                    LogController.Debug("Socks proxy connection closed: " + this.Proxy.Client.RemoteEndPoint.ToString());
+                }
+                else
+                {
+                    LogController.Debug("Socks proxy connection closed.");
+                }
                 this.Proxy.Close();
                 this.Proxy = null;
             }
@@ -125,7 +132,16 @@ namespace brbypass_client.Controller.Net
             if (this.Client.Connected)
             {
                 TcpTunnel tunnel = new TcpTunnel(this.TcpTunnelConfig);
-                TcpClient proxyClient = tunnel.GetClient();
+                TcpClient proxyClient = null;
+                try
+                {
+                    proxyClient = new TcpClient();
+                    proxyClient.Connect(TcpTunnelConfig.Host, TcpTunnelConfig.Port);
+                } catch (Exception e)
+                {
+                    this.Close();
+                    return;
+                }
                 if (proxyClient != null)
                 {
                     this.Proxy = proxyClient;
@@ -217,7 +233,7 @@ namespace brbypass_client.Controller.Net
                                 goto __Next;
                         }
 
-                        sendBuffer[0] = 0x07;sendBuffer[1] = 0x02;sendBuffer[2] = 0x03;
+                        sendBuffer[0] = 0x07; sendBuffer[1] = 0x02; sendBuffer[2] = 0x03;
                         //convert size to bytes (little endian)
                         byte[] b_size = BitConverter.GetBytes(size);
                         sendBuffer[3] = b_size[0]; sendBuffer[4] = b_size[1];
@@ -247,7 +263,7 @@ namespace brbypass_client.Controller.Net
                                 sendBuffer[9] = b_port[1];
                                 b_domain.CopyTo(sendBuffer, 10);
                                 //Copy real data to the end of sendBuffer
-                                Array.Copy(_ClientBuffer, 0, sendBuffer, 10+b_domain.Length, size);
+                                Array.Copy(_ClientBuffer, 0, sendBuffer, 10 + b_domain.Length, size);
                                 break;
                             case 5:
                                 sendBuffer[5] = 0x05;
@@ -260,13 +276,15 @@ namespace brbypass_client.Controller.Net
                                 Array.Copy(_ClientBuffer, 0, sendBuffer, 24, size);
                                 break;
                         }
-                        
+
 
                         //发送数据包
                         SocketUtils.Send(this.Proxy.Client, sendBuffer, 0, sendBuffer.Length);
                         __Next:
                         if (this.Server.IsStarted)
+                        {
                             this.Client.BeginReceive(_ClientBuffer, 0, _ClientBuffer.Length, SocketFlags.None, this.OnClientReceive, this.Client);
+                        }
                     }
                     else
                     {
@@ -306,15 +324,17 @@ namespace brbypass_client.Controller.Net
                             {
                                 socket.BeginReceive(_ProxyBuffer, 0, _ProxyBuffer.Length, SocketFlags.None, this.OnProxyReceive, socket);
                             }
-                        } else
+                        }
+                        else
                         {
                             LogController.Debug("Receive a wrong header packet.");
                             this.Close();
-                        }                        
+                        }
                     }
                 }
                 catch (Exception e)
                 {
+                    LogController.Debug("Catch an exception at OnProxyReceive: " + e.Message);
                     this.Close();
                 }
             }
@@ -328,7 +348,7 @@ namespace brbypass_client.Controller.Net
             {
                 SocketUtils.Receive(this.Client, 1, out buffer);
                 if (this.Server.RequireValidate)
-                {                    
+                {
                     while (buffer.Length > 0)
                     {
                         if (buffer[0] == 0x02) method = 0x02;
@@ -439,15 +459,22 @@ namespace brbypass_client.Controller.Net
                                 {
                                     //取得域名地址
                                     string address = Encoding.ASCII.GetString(buffer);
-                                    IPAddress[] addresses = Dns.GetHostAddresses(address);
-                                    if (addresses.Length != 0)
+                                    try
                                     {
-                                        ipAddress = addresses[0];
-                                        this.Address = address;
+                                        IPAddress[] addresses = Dns.GetHostAddresses(address);
+                                        if (addresses.Length != 0)
+                                        {
+                                            ipAddress = addresses[0];
+                                            this.Address = address;
+                                        }
+                                        else
+                                        {
+                                            rep = 0x04;  //主机不可达
+                                        }
                                     }
-                                    else
+                                    catch (Exception e)
                                     {
-                                        rep = 0x04;  //主机不可达
+                                        LogController.Error("Dns error: " + e.Message);
                                     }
                                 }
                             }
@@ -474,9 +501,10 @@ namespace brbypass_client.Controller.Net
                 {
                     Array.Reverse(buffer);  //反转端口值
                     if (this.Type == 1 || this.Type == 4)
-                    {                        
-                        this.RemoteEndPoint = new IPEndPoint(ipAddress, BitConverter.ToUInt16(buffer, 0));                        
-                    } else
+                    {
+                        this.RemoteEndPoint = new IPEndPoint(ipAddress, BitConverter.ToUInt16(buffer, 0));
+                    }
+                    else
                     {
                         this.RemotePort = BitConverter.ToUInt16(buffer, 0);
                     }
