@@ -219,7 +219,8 @@ namespace brbypass_client
         public void updateUI_startFailed()
         {
             var update = new Action(() => {
-                btn_start.IsEnabled = true;                
+                btn_start.IsEnabled = true;
+                cb_selectServer.IsEnabled = true;
                 btn_stop.Visibility = Visibility.Hidden;
                 btn_start.Visibility = Visibility.Visible;
             });

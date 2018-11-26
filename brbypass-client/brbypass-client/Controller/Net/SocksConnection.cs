@@ -9,16 +9,17 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Starksoft.Aspen.Proxy;
 
 namespace brbypass_client.Controller.Net
 {
     class SocksConnection
     {
-        public SocksConnection(SocksServer server, Socket client, TunnelConfig tcpTunnelConfig)
+        public SocksConnection(SocksServer server, Socket client, TunnelConfig tunnelConfig)
         {
             this.Server = server;
             this.Client = client;
-            this.TcpTunnelConfig = tcpTunnelConfig;
+            this.TunnelConfig = tunnelConfig;
         }
         private SocksServer Server
         {
@@ -55,7 +56,7 @@ namespace brbypass_client.Controller.Net
             set;
         }
 
-        private TunnelConfig TcpTunnelConfig
+        private TunnelConfig TunnelConfig
         {
             get;
             set;
@@ -131,15 +132,14 @@ namespace brbypass_client.Controller.Net
         {
             if (this.Client.Connected)
             {
-                TcpTunnel tunnel = new TcpTunnel(this.TcpTunnelConfig);
                 TcpClient proxyClient = null;
                 try
                 {
-                    proxyClient = new TcpClient();
-                    proxyClient.Connect(TcpTunnelConfig.Host, TcpTunnelConfig.Port);
+                    proxyClient = new TcpClient(TunnelConfig.Host, TunnelConfig.Port);
                 } catch (Exception e)
                 {
-                    this.Close();
+                    LogController.Error("A error occured when creating a tunnel: " + e.Message);
+                    this.Close(); 
                     return;
                 }
                 if (proxyClient != null)
@@ -147,9 +147,91 @@ namespace brbypass_client.Controller.Net
                     this.Proxy = proxyClient;
                     try
                     {
-                        //this.Proxy.Connect(this.RemoteEndPoint);
+                        //this.Proxy.Connect(TunnelConfig.Host, TunnelConfig.Port);
                         if (this.Proxy.Connected)
-                        {
+                        {// Send Bind Message
+                         //
+                         //  0    1    2     4      5 - ?
+                         // 0x07 0x02 CMD   TYPE   VARIABLE
+
+                            // 3 Type of Message:
+                            //
+                            //  0    1    2    3    4-7    8-9
+                            // 0x07 0x02 CMD  0x01 DESTIP  PORT
+
+                            //  0    1    2     3       4-5     6-7    8-? 
+                            // 0x07 0x02 CMD  0x03   DOMAINLEN  PORT  DOMAIN
+
+                            //  0    1    2    3    4 - 19    20-21
+                            // 0x07 0x02 CMD  0x04  DESTIP    PORT
+
+
+                            // CMD  = 0x02 - Bind Request
+
+                            // TYPE = 0x01 - IPv4
+                            // TYPE = 0x03 - Domain
+                            // TYPE = 0x04 - IPv6
+
+                            //构造数据包
+                            byte[] sendBuffer = new byte[0];
+
+                            byte[] b_domain = new byte[0];
+
+                            switch (this.Type)
+                            {
+                                case 1:
+                                    sendBuffer = new byte[12];
+                                    break;
+                                case 3:
+                                    b_domain = Encoding.UTF8.GetBytes(this.Address);
+                                    sendBuffer = new byte[10 + b_domain.Length];
+                                    break;
+                                case 4:
+                                    sendBuffer = new byte[24];
+                                    break;
+                                default:
+                                    this.Close();
+                                    break;
+                            }
+
+                            sendBuffer[0] = 0x07; sendBuffer[1] = 0x02; sendBuffer[2] = 0x02;
+
+                            byte[] b_ip;
+                            byte[] b_port;
+
+                            switch (this.Type)
+                            {
+                                case 1:
+                                    sendBuffer[3] = 0x01;
+                                    b_ip = RemoteEndPoint.Address.GetAddressBytes();
+                                    b_ip.CopyTo(sendBuffer, 4);
+                                    b_port = BitConverter.GetBytes(this.RemotePort);
+                                    sendBuffer[8] = b_port[0]; sendBuffer[9] = b_port[1];
+                                    break;
+                                case 3:
+                                    sendBuffer[3] = 0x03;
+                                    //little endian
+                                    byte[] b_domainlen = BitConverter.GetBytes(b_domain.Length);
+                                    sendBuffer[4] = b_domainlen[0];
+                                    sendBuffer[5] = b_domainlen[1];
+                                    b_port = BitConverter.GetBytes(this.RemotePort);
+                                    sendBuffer[6] = b_port[0];
+                                    sendBuffer[7] = b_port[1];
+                                    b_domain.CopyTo(sendBuffer, 8);
+                                    break;
+                                case 4:
+                                    sendBuffer[3] = 0x04;
+                                    b_ip = RemoteEndPoint.Address.GetAddressBytes();
+                                    b_ip.CopyTo(sendBuffer, 4);
+                                    b_port = BitConverter.GetBytes(this.RemotePort);
+                                    sendBuffer[20] = b_port[0];
+                                    sendBuffer[21] = b_port[1];
+                                    break;
+                            }
+
+
+                            //发送数据包
+                            SocketUtils.Send(this.Proxy.Client, sendBuffer, 0, sendBuffer.Length);
                             _ClientBuffer = new byte[this.Client.ReceiveBufferSize];
                             _ProxyBuffer = new byte[this.Proxy.ReceiveBufferSize];
                             this.Client.BeginReceive(_ClientBuffer, 0, _ClientBuffer.Length, SocketFlags.None, this.OnClientReceive, this.Client);
@@ -191,96 +273,28 @@ namespace brbypass_client.Controller.Net
                     {
                         // Send Message
                         //
-                        //  0    1    2    3-4     5      6 - ?
-                        // 0x07 0x02 CMD  LENGTH  TYPE   VARIABLE
-
-                        // 3 Type of Message:
-                        //
-                        //  0    1    2    3-4     5     6 - 9    10 - 11
-                        // 0x07 0x02 CMD  LENGTH  0x01   DESTIP    PORT
-
-                        //  0    1    2    3-4     5       6 - 7     8 - 9    10 - ? 
-                        // 0x07 0x02 CMD  LENGTH  0x03   DOMAINLEN    PORT    DOMAIN
-
-                        //  0    1    2    3-4     5     6 - 21    22 - 23
-                        // 0x07 0x02 CMD  LENGTH  0x05   DESTIP      PORT
-
+                        //  0    1    2    3-4      5-?
+                        // 0x07 0x02 CMD  LENGTH  CONTENT
 
                         // CMD  = 0x03 - TCP Request
-
-                        // TYPE = 0x01 - IPv4
-                        // TYPE = 0x03 - Domain
-                        // TYPE = 0x05 - IPv6
 
                         //构造数据包
                         byte[] sendBuffer = new byte[0];
 
                         byte[] b_domain = new byte[0];
 
-                        switch (this.Type)
-                        {
-                            case 1:
-                                sendBuffer = new byte[size + 12];
-                                break;
-                            case 3:
-                                b_domain = Encoding.UTF8.GetBytes(this.Address);
-                                sendBuffer = new byte[size + 10 + b_domain.Length];
-                                break;
-                            case 5:
-                                sendBuffer = new byte[size + 24];
-                                break;
-                            default:
-                                goto __Next;
-                        }
+                        sendBuffer = new byte[size + 5];
 
                         sendBuffer[0] = 0x07; sendBuffer[1] = 0x02; sendBuffer[2] = 0x03;
                         //convert size to bytes (little endian)
                         byte[] b_size = BitConverter.GetBytes(size);
                         sendBuffer[3] = b_size[0]; sendBuffer[4] = b_size[1];
 
-                        byte[] b_ip;
-                        byte[] b_port;
-
-                        switch (this.Type)
-                        {
-                            case 1:
-                                sendBuffer[5] = 0x01;
-                                b_ip = RemoteEndPoint.Address.GetAddressBytes();
-                                b_ip.CopyTo(sendBuffer, 6);
-                                b_port = BitConverter.GetBytes(this.RemotePort);
-                                sendBuffer[10] = b_port[0]; sendBuffer[11] = b_port[1];
-                                //Copy real data to the end of sendBuffer
-                                Array.Copy(_ClientBuffer, 0, sendBuffer, 12, size);
-                                break;
-                            case 3:
-                                sendBuffer[5] = 0x03;
-                                //little endian
-                                byte[] b_domainlen = BitConverter.GetBytes(b_domain.Length);
-                                sendBuffer[6] = b_domainlen[0];
-                                sendBuffer[7] = b_domainlen[1];
-                                b_port = BitConverter.GetBytes(this.RemotePort);
-                                sendBuffer[8] = b_port[0];
-                                sendBuffer[9] = b_port[1];
-                                b_domain.CopyTo(sendBuffer, 10);
-                                //Copy real data to the end of sendBuffer
-                                Array.Copy(_ClientBuffer, 0, sendBuffer, 10 + b_domain.Length, size);
-                                break;
-                            case 5:
-                                sendBuffer[5] = 0x05;
-                                b_ip = RemoteEndPoint.Address.GetAddressBytes();
-                                b_ip.CopyTo(sendBuffer, 6);
-                                b_port = BitConverter.GetBytes(this.RemotePort);
-                                sendBuffer[22] = b_port[0];
-                                sendBuffer[23] = b_port[1];
-                                //Copy real data to the end of sendBuffer
-                                Array.Copy(_ClientBuffer, 0, sendBuffer, 24, size);
-                                break;
-                        }
-
+                        Array.Copy(_ClientBuffer, 0, sendBuffer, 5, size);
 
                         //发送数据包
                         SocketUtils.Send(this.Proxy.Client, sendBuffer, 0, sendBuffer.Length);
-                        __Next:
+
                         if (this.Server.IsStarted)
                         {
                             this.Client.BeginReceive(_ClientBuffer, 0, _ClientBuffer.Length, SocketFlags.None, this.OnClientReceive, this.Client);

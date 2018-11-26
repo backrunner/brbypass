@@ -24,7 +24,6 @@
             <TextBlock x:Name="tb_log" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Top"  Width="Auto" FontSize="12"/>
         </ScrollViewer>
         <Button x:Name="btn_clear" Content="Clear" HorizontalAlignment="Left" Margin="667,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" FontSize="12" Click="btn_clear_Click"/>
-        <Button x:Name="btn_export" Content="Export" HorizontalAlignment="Left" Margin="527,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" RenderTransformOrigin="0.862,0.667" FontSize="12"/>
-        <Button x:Name="btn_refresh" Content="Refresh" HorizontalAlignment="Left" Margin="597,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" FontSize="12" Click="btn_refresh_Click"/>
+        <Button x:Name="btn_export" Content="Export" HorizontalAlignment="Left" Margin="597,395,0,0" VerticalAlignment="Top" Width="65" Height="21" Padding="0" FontSize="12"/>
     </Grid>
 </metro:MetroWindow>

@@ -62,6 +62,9 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="starksoft.aspen, Version=1.1.5.0, Culture=neutral, PublicKeyToken=56b8923a24d03eb3, processorArchitecture=MSIL">
+      <HintPath>..\packages\starksoft.aspen.1.1.6\lib\net45\starksoft.aspen.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -88,7 +91,6 @@
     <Compile Include="Controller\LogController.cs" />
     <Compile Include="Controller\Net\SocksConnection.cs" />
     <Compile Include="Controller\Net\SocksServer.cs" />
-    <Compile Include="Controller\Net\TcpTunnel.cs" />
     <Compile Include="Controller\ServerConfig.cs" />
     <Compile Include="Model\Log.cs" />
     <Compile Include="Model\Net\JsonRequest.cs" />

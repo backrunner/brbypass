@@ -26,7 +26,7 @@ namespace brbypass_client.Util
         /// <returns></returns>
         internal static bool Receive(Socket client, uint maxSize, out byte[] buffer)
         {
-            buffer = new byte[0];
+            buffer = new byte[maxSize];
             int offset = 0;
             if (client.Connected)
             {
@@ -91,7 +91,13 @@ namespace brbypass_client.Util
                     if (client.Poll(TIMEOUT, SelectMode.SelectWrite))
                     {
                         //client.SendBufferSize = 10;
-                        client.Send(data, offset, size, SocketFlags.Partial);
+                        var sent = client.Send(data, offset, size, SocketFlags.Partial);
+                        byte[] new_data = new byte[size - sent];
+                        Array.Copy(data, sent, new_data, 0, size - sent);
+                        if (sent < size)
+                        {
+                            Send(client, new_data, 0, size - sent);
+                        }
                     }
                 }
                 catch { }

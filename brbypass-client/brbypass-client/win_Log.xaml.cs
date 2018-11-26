@@ -48,28 +48,14 @@ namespace brbypass_client
 
         private void appendLog(Log t)
         {
-            var update = new Action(() => {tb_log.Text += t.time + ": " + t.content + "\r\n"; sv_log.ScrollToBottom(); });
-            this.BeginInvoke(update);
+            var update = new Action(() => {tb_log.Text += t.time + ": " + t.content + "\r\n"; sv_log.ScrollToBottom(); LogController.logs.Remove(t); });
+            this.BeginInvoke(update);            
         }
 
         private void btn_clear_Click(object sender, RoutedEventArgs e)
         {
             LogController.logs = new ArrayList();
             tb_log.Text = "";
-        }
-
-        private void btn_refresh_Click(object sender, RoutedEventArgs e)
-        {
-            tb_log.Text = "";
-            for (int i = 0; i < LogController.logs.Count; i++)
-            {
-                Log t = (Log)LogController.logs[i];
-                if (t != null)
-                {
-                    tb_log.Text += t.time + ": " + t.content + "\r\n";
-                }
-            }
-            sv_log.ScrollToBottom();
         }
 
         private void MetroWindow_Closed(object sender, EventArgs e)
