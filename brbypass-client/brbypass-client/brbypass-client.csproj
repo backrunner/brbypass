@@ -105,6 +105,9 @@
     <Compile Include="win_Log.xaml.cs">
       <DependentUpon>win_Log.xaml</DependentUpon>
     </Compile>
+    <Compile Include="win_manageProxyServer.xaml.cs">
+      <DependentUpon>win_manageProxyServer.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,6 +125,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="win_Log.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="win_manageProxyServer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

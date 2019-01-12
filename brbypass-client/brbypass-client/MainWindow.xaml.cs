@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +32,8 @@ namespace brbypass_client
         //window obj
         public static MainWindow mainWindow;
         public static win_Log logWindow;
+        public static win_addProxyServer win_aps;
+        public static win_manageProxyServer win_mps;
 
         //config path
         public static string startupPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -41,7 +44,7 @@ namespace brbypass_client
             mainWindow = this;
         }
 
-        public Server[] servers;
+        public List<Server> servers = new List<Server>();
 
         //net obj
         private SocksServer socksServer;
@@ -52,16 +55,18 @@ namespace brbypass_client
             if (Directory.Exists(startupPath + "config")){
                 if (File.Exists(ServerConfig.Path))
                 {
-                    //init items                    
+                    //init items    
+                    Server[] tempServers;
                     using (StreamReader jsonFile = File.OpenText(ServerConfig.Path))
-                    {
-                        servers = JsonConvert.DeserializeObject<Server[]>(jsonFile.ReadToEnd());
+                    {                        
+                        tempServers = JsonConvert.DeserializeObject<Server[]>(jsonFile.ReadToEnd());
                     }
-                    if (servers.Length > 0)
+                    if (tempServers.Length > 0)
                     {
-                        for (int i = 0; i < servers.Length; i++)
+                        for (int i = 0; i < tempServers.Length; i++)
                         {
-                            cb_selectServer.Items.Add(servers[i].host);
+                            servers.Add(tempServers[i]);
+                            cb_selectServer.Items.Add(tempServers[i].host);
                         }
                         //init selected item
                         int lastchoice = -1;
@@ -82,7 +87,14 @@ namespace brbypass_client
                                 }
                             }
                         }
-                        cb_selectServer.SelectedIndex = lastchoice;
+                        if (lastchoice >= cb_selectServer.Items.Count || lastchoice < 0)
+                        {
+                            cb_selectServer.SelectedIndex = 0;
+                        }
+                        else
+                        {
+                            cb_selectServer.SelectedIndex = lastchoice;
+                        }
                     }
                     else
                     {
@@ -105,9 +117,15 @@ namespace brbypass_client
         private void btn_addProxyServer_Click(object sender, RoutedEventArgs e)
         {
             //open add proxy server window
-            win_addProxyServer win_aps = new win_addProxyServer();
-            win_aps.Show();
-            this.IsEnabled = false;
+            if (win_aps != null)
+            {
+                win_aps.Focus();
+            } else
+            {
+                win_aps = new win_addProxyServer();
+                win_aps.Show();
+                this.IsEnabled = false;                
+            }
         }
 
         private void MetroWindow_Closed(object sender, EventArgs e)
@@ -198,14 +216,14 @@ namespace brbypass_client
                 btn_stop.IsEnabled = false;
                 //ping remote server
                 Ping ping = new Ping();
-                PingReply reply = ping.Send(servers[cb_selectServer.SelectedIndex].host, 1000);
+                PingReply reply = ping.Send((servers[cb_selectServer.SelectedIndex]).host, 1000);
                 if (reply.Status == IPStatus.Success)
                 {
-                    switch (servers[cb_selectServer.SelectedIndex].mode)
+                    switch ((servers[cb_selectServer.SelectedIndex]).mode)
                     {
                         case 1:
-                            socksServer = new SocksServer((ushort)servers[cb_selectServer.SelectedIndex].localPort);
-                            socksServer.Start(servers[cb_selectServer.SelectedIndex].host, servers[cb_selectServer.SelectedIndex].port, servers[cb_selectServer.SelectedIndex].password);
+                            socksServer = new SocksServer((ushort)(servers[cb_selectServer.SelectedIndex]).localPort);
+                            socksServer.Start((servers[cb_selectServer.SelectedIndex]).host, (servers[cb_selectServer.SelectedIndex]).port, (servers[cb_selectServer.SelectedIndex]).password);
                             break;
                     }
                 } else
@@ -243,11 +261,40 @@ namespace brbypass_client
             btn_start.IsEnabled = true;
             btn_start.Visibility = Visibility.Visible;
             btn_stop.Visibility = Visibility.Hidden;
-            switch (servers[cb_selectServer.SelectedIndex].mode)
+            switch ((servers[cb_selectServer.SelectedIndex]).mode)
             {
                 case 1:
                     socksServer.Stop();
                     break;
+            }
+        }
+
+        private void Btn_deleteProxyServer_Click(object sender, RoutedEventArgs e)
+        {
+            int index = cb_selectServer.SelectedIndex;
+            servers.Remove(servers[cb_selectServer.SelectedIndex]);
+            ServerConfig.SaveConfig(servers.ToArray());
+            //update ui
+            cb_selectServer.Items.RemoveAt(index);
+            if (index >= cb_selectServer.Items.Count)
+            {
+                cb_selectServer.SelectedIndex = cb_selectServer.Items.Count - 1;
+            } else
+            {
+                cb_selectServer.SelectedIndex = index;
+            }
+        }
+
+        private void Btn_manageServers_Click(object sender, RoutedEventArgs e)
+        {
+            if (win_mps != null)
+            {
+                win_mps.Focus();
+            } else
+            {
+                win_mps = new win_manageProxyServer();
+                win_mps.Show();
+                this.IsEnabled = false;
             }
         }
     }

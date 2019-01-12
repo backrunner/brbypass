@@ -13,6 +13,8 @@ namespace brbypass_client.Controller
     {
         public static string Path = MainWindow.startupPath + "config\\servers.json";
 
+        public static string[] ServerModes = {"Socks"};
+
         public static void SaveConfig(Server[] servers)
         {
             JsonSerializer serializer = new JsonSerializer();

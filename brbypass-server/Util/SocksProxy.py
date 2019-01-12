@@ -7,7 +7,6 @@ import os
 import re
 import ssl
 import threading
-from Util import namechecker
 from Controller import Config, Log
 
 clients = {}
@@ -123,6 +122,7 @@ class SocksProxyServer:
                         af, socktype, proto, canonname, sa = addrs[0]
                         remote = socket.socket(af, socktype, proto)
                         remote.setblocking(0)
+                        remote.setsockopt(socket.SOL_TCP, socket.TCP_NODELAY, 1)
                         try:
                             await loop.sock_connect(remote, sa)
                         except Exception as e:
@@ -134,33 +134,35 @@ class SocksProxyServer:
                         contentLength = int.from_bytes(
                             b_length, byteorder='little')
                         b_content = await asyncio.wait_for(reader.read(contentLength), timeout=timeout)
-                        asyncio.Task(self.doproxy(remote=remote, reader=reader, writer=writer, address=address, port=port, data=b_content, timeout=timeout))
+                        asyncio.Task(self.doproxy(remote=remote, reader=reader, writer=writer, address=address, port=port, data=b_content, timeout=timeout), loop=asyncio.get_event_loop())
 
     async def doproxy(self,remote, reader, writer, address, port, data, timeout):
-        header = b'\x06\x03\x04'
         loop = asyncio.get_event_loop()
-
         try:
+            asyncio.Task(self.transferData(remote=remote, writer=writer), loop=asyncio.get_event_loop())
             await loop.sock_sendall(remote, data)
-            Log.info("Data has sent to remote: " + str(data))
+            #Log.info("Data has sent to remote: " + str(data))
         except Exception as e:
             Log.error("An error occured when send data to remote: " + str(e))
             return
 
+    async def transferData(self, remote, writer):
+        header = b'\x06\x03\x03'
+        loop = asyncio.get_event_loop()
         while True:
             try:
                 recv = await loop.sock_recv(remote, 4096)
-            except Exception as e:
+            except:
                 break
             if not recv:
                 break
             else:
                 recv_len = len(recv)
                 if (recv_len > 0):
-                    Log.info("Data received: "+str(recv))
+                    #Log.info("Data received: "+str(recv))
                     b_sendLen = recv_len.to_bytes(2, byteorder='little')
                     writer.write(header+b_sendLen+recv)
                     await writer.drain()
-                    Log.debug("Data has sent to local")
+                    #Log.debug("Data has sent to local")
                 else:
                     break

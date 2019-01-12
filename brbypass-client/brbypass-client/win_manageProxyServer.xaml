@@ -1,0 +1,45 @@
+﻿<metro:MetroWindow x:Class="brbypass_client.win_manageProxyServer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:local="clr-namespace:brbypass_client"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        GlowBrush="{DynamicResource AccentColorBrush}"
+        BorderThickness="1"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Manage Servers" ResizeMode="NoResize" TitleForeground="White"
+        WindowTitleBrush="{DynamicResource AccentColorBrush}"
+        Height="450" Width="500" Loaded="Window_Loaded" Closed="MetroWindow_Closed">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="165*"/>
+            <ColumnDefinition Width="11*"/>
+            <ColumnDefinition Width="316*"/>
+        </Grid.ColumnDefinitions>
+        <ListBox x:Name="lb_servers" HorizontalAlignment="Left" Height="369" Margin="10,40,0,0" VerticalAlignment="Top" Width="155" SelectionChanged="Lb_servers_SelectionChanged"/>
+        <Label Content="Servers" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <Label Content="Host" Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <TextBox x:Name="tb_host" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="10,40,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="296" TextChanged="Tb_host_TextChanged"/>
+        <Label Content="Port" Grid.Column="2" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <TextBox x:Name="tb_port" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="10,98,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="296" TextChanged="Tb_port_TextChanged"/>
+        <Label Content="Password" Grid.Column="2" HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <Label Content="Local Port" Grid.Column="2" HorizontalAlignment="Left" Margin="10,188,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <TextBox x:Name="tb_localPort" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="10,219,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="296" TextChanged="Tb_localPort_TextChanged"/>
+        <Label Content="Mode" Grid.Column="2" HorizontalAlignment="Left" Margin="10,247,0,0" VerticalAlignment="Top" Padding="0,5,5,5"/>
+        <ComboBox x:Name="cb_mode" Grid.Column="2" HorizontalAlignment="Left" Margin="10,278,0,0" VerticalAlignment="Top" Width="296" Height="28" SelectionChanged="Cb_mode_SelectionChanged"/>
+        <Button x:Name="btn_save" Content="Save" Grid.Column="2" HorizontalAlignment="Left" Margin="251,390,0,0" VerticalAlignment="Top" Width="55" Height="19" Padding="0" FontSize="10" IsEnabled="False" Click="Btn_save_Click"/>
+        <Button Content="Add" Grid.Column="2" HorizontalAlignment="Left" Margin="191,390,0,0" VerticalAlignment="Top" Width="55" Height="19" Padding="0" FontSize="10"/>
+        <Button x:Name="btn_delServer" Content="Delete" Grid.Column="2" HorizontalAlignment="Left" Margin="131,390,0,0" VerticalAlignment="Top" Width="55" Height="19" Padding="0" FontSize="10" Click="Btn_delServer_Click"/>
+        <PasswordBox x:Name="tb_password" Grid.Column="2" HorizontalAlignment="Left" Margin="10,157,0,0" VerticalAlignment="Top" Width="296" PasswordChanged="Tb_password_PasswordChanged"/>
+
+    </Grid>
+</metro:MetroWindow>

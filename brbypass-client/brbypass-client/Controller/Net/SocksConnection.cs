@@ -93,6 +93,7 @@ namespace brbypass_client.Controller.Net
         public static void DoRequest(SocksServer server, Socket client, TunnelConfig tunnelConfig)
         {
             SocksConnection connection = new SocksConnection(server, client, tunnelConfig);
+            client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             ThreadPool.QueueUserWorkItem(new WaitCallback(connection.DoRequest));
         }
 
@@ -136,6 +137,7 @@ namespace brbypass_client.Controller.Net
                 try
                 {
                     proxyClient = new TcpClient(TunnelConfig.Host, TunnelConfig.Port);
+                    proxyClient.Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
                 } catch (Exception e)
                 {
                     LogController.Error("A error occured when creating a tunnel: " + e.Message);
@@ -276,7 +278,7 @@ namespace brbypass_client.Controller.Net
                         //  0    1    2    3-4      5-?
                         // 0x07 0x02 CMD  LENGTH  CONTENT
 
-                        // CMD  = 0x03 - TCP Request
+                        // CMD  = 0x03 - TCP Request No Encryption 
 
                         //构造数据包
                         byte[] sendBuffer = new byte[0];
@@ -327,8 +329,8 @@ namespace brbypass_client.Controller.Net
                         // Recv Buffer
                         //  0     1     2    3 - 4    5 - ?
                         // 0x06  0x03  CMD  LENGTH    DATA
-                        // CMD: 0x04 - TCP Response
-                        if (_ProxyBuffer[0] == 0x06 && _ProxyBuffer[1] == 0x03 && _ProxyBuffer[2] == 0x04)
+                        // CMD: 0x03 - TCP Response No Encryption
+                        if (_ProxyBuffer[0] == 0x06 && _ProxyBuffer[1] == 0x03 && _ProxyBuffer[2] == 0x03)
                         {
                             int contentLength = BitConverter.ToInt16(_ProxyBuffer, 3);
                             byte[] content = new byte[contentLength];

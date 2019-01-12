@@ -78,9 +78,9 @@ namespace brbypass_client
                 ServerConfig.SaveConfig(new_servers);
                 this.Close();
                 //add to mainWindow's combobox
+                MainWindow.mainWindow.servers.Add(server);
                 MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
                 MainWindow.mainWindow.cb_selectServer.IsEnabled = true;
-                MainWindow.mainWindow.servers = new_servers;
             } else
             {
                 Server server = new Server();
@@ -101,16 +101,19 @@ namespace brbypass_client
                 ServerConfig.SaveConfig(servers);
                 this.Close();
                 //Add to mainWindow's combobox
+                MainWindow.mainWindow.servers.Add(server);
                 MainWindow.mainWindow.cb_selectServer.Items.Add(server.host);
-                MainWindow.mainWindow.cb_selectServer.IsEnabled = true;
-                MainWindow.mainWindow.servers = servers;
+                MainWindow.mainWindow.cb_selectServer.IsEnabled = true;                
             }
         }
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //set up combo box
-            cb_selectMode.Items.Add("Socks");
+            foreach (string mode in ServerConfig.ServerModes)
+            {
+                cb_selectMode.Items.Add(mode);
+            }
             cb_selectMode.SelectedIndex = 0;
         }
     }
