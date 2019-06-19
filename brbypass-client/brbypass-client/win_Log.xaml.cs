@@ -60,7 +60,7 @@ namespace brbypass_client
 
         private void MetroWindow_Closed(object sender, EventArgs e)
         {
-            MainWindow.logWindow = null;
+            MainWindow.mainWindow.logWindow = null;
         }
     }
 }

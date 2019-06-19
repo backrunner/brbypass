@@ -22,13 +22,11 @@
     <Grid>
         <Label Content="Server:" HorizontalAlignment="Left" Margin="20,139,0,0" VerticalAlignment="Top" Padding="0,5,5,5" Grid.IsSharedSizeScope="True" Height="26" Width="60"/>
         <ComboBox x:Name="cb_selectServer" HorizontalAlignment="Left" Margin="20,170,0,0" VerticalAlignment="Top" Width="252" BorderThickness="0,0,0,1"/>
-        <Button x:Name="btn_addProxyServer" Content="+" HorizontalAlignment="Left" Margin="286,172,0,0" VerticalAlignment="Top" Width="17" Height="26" FontSize="12" Padding="0" Click="btn_addProxyServer_Click"/>
-
-        <Button Content="Edit" HorizontalAlignment="Left" Margin="330,172,0,0" VerticalAlignment="Top" Width="36" Height="26" FontSize="12" Padding="0"/>
+        <Button x:Name="btn_addProxyServer" Content="+" HorizontalAlignment="Left" Margin="286,172,0,0" VerticalAlignment="Top" Width="38" Height="26" FontSize="14" Padding="0" Click="btn_addProxyServer_Click"/>
         <Button x:Name="btn_manageServers" Content="Manage" HorizontalAlignment="Left" Margin="286,203,0,0" VerticalAlignment="Top" Width="80" Height="24" FontSize="12" Padding="16,0" Click="Btn_manageServers_Click"/>
         <Button x:Name="btn_test" Content="Test" HorizontalAlignment="Left" Margin="20,203,0,0" VerticalAlignment="Top" Width="47" Height="24" FontSize="12" Padding="0" Click="btn_test_Click"/>
         <Label x:Name="lbl_pingDelay" Content="" HorizontalAlignment="Left" Margin="167,203,0,0" VerticalAlignment="Top" Width="105" Padding="0,5" HorizontalContentAlignment="Right" Height="24"/>
-        <Button x:Name="btn_deleteProxyServer" Content="-" HorizontalAlignment="Left" Margin="308,172,0,0" VerticalAlignment="Top" Width="17" Height="26" FontSize="12" Padding="0" Click="Btn_deleteProxyServer_Click"/>
+        <Button x:Name="btn_deleteProxyServer" Content="-" HorizontalAlignment="Left" Margin="328,172,0,0" VerticalAlignment="Top" Width="38" Height="26" FontSize="14" Padding="0" Click="Btn_deleteProxyServer_Click"/>
         <Button x:Name="btn_log" Content="Log" HorizontalAlignment="Left" Margin="286,232,0,0" VerticalAlignment="Top" Width="80" Height="24" FontSize="12" Padding="16,0" Click="btn_log_Click"/>
         <Button x:Name="btn_start" Content="Start" Margin="116,363,116,0" VerticalAlignment="Top" Height="44" FontSize="17"  Click="btn_start_Click"/>
         <Button x:Name="btn_stop" Content="Stop" Margin="116,363,116,0" VerticalAlignment="Top" Height="44" FontSize="17"  Visibility="Hidden"  Click="btn_stop_Click"/>

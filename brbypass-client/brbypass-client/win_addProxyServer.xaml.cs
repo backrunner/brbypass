@@ -37,6 +37,7 @@ namespace brbypass_client
         private void MetroWindow_Closed(object sender, EventArgs e)
         {
             MainWindow.mainWindow.IsEnabled = true;
+            MainWindow.mainWindow.win_aps = null;
         }
 
         private void btn_AddServer_Save_Click(object sender, RoutedEventArgs e)

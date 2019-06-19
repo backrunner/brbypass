@@ -31,9 +31,9 @@ namespace brbypass_client
     {
         //window obj
         public static MainWindow mainWindow;
-        public static win_Log logWindow;
-        public static win_addProxyServer win_aps;
-        public static win_manageProxyServer win_mps;
+        public win_Log logWindow;
+        public win_addProxyServer win_aps;
+        public win_manageProxyServer win_mps;
 
         //config path
         public static string startupPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -52,13 +52,14 @@ namespace brbypass_client
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //check config file
-            if (Directory.Exists(startupPath + "config")){
+            if (Directory.Exists(startupPath + "config"))
+            {
                 if (File.Exists(ServerConfig.Path))
                 {
                     //init items    
                     Server[] tempServers;
                     using (StreamReader jsonFile = File.OpenText(ServerConfig.Path))
-                    {                        
+                    {
                         tempServers = JsonConvert.DeserializeObject<Server[]>(jsonFile.ReadToEnd());
                     }
                     if (tempServers.Length > 0)
@@ -75,12 +76,13 @@ namespace brbypass_client
                             using (StreamReader lastChoiceConfig = File.OpenText(startupPath + "config\\lastChoice.json"))
                             {
                                 using (JsonTextReader reader = new JsonTextReader(lastChoiceConfig))
-                                {                                    
+                                {
                                     try
                                     {
                                         JObject o = (JObject)JToken.ReadFrom(reader);
                                         lastchoice = (int)o["lastChoice"];
-                                    } catch (Exception ex)
+                                    }
+                                    catch (Exception ex)
                                     {
                                         LogController.Error("Load last choice error: " + ex.Message);
                                     }
@@ -100,12 +102,14 @@ namespace brbypass_client
                     {
                         cb_selectServer.IsEnabled = false;
                     }
-                } else
+                }
+                else
                 {
                     //disable combobox when config is not found
                     cb_selectServer.IsEnabled = false;
                 }
-            } else
+            }
+            else
             {
                 //disable combobox when config is not found
                 cb_selectServer.IsEnabled = false;
@@ -120,11 +124,12 @@ namespace brbypass_client
             if (win_aps != null)
             {
                 win_aps.Focus();
-            } else
+            }
+            else
             {
                 win_aps = new win_addProxyServer();
                 win_aps.Show();
-                this.IsEnabled = false;                
+                this.IsEnabled = false;
             }
         }
 
@@ -133,7 +138,7 @@ namespace brbypass_client
             //save last choice of server
             using (StreamWriter sw = new StreamWriter(startupPath + "config\\lastChoice.json"))
             {
-                sw.WriteLine("{\"lastChoice\":" + cb_selectServer.SelectedIndex + ",\"lastChoiceHost\":\""+cb_selectServer.SelectedItem.ToString()+"\"}");
+                sw.WriteLine("{\"lastChoice\":" + cb_selectServer.SelectedIndex + ",\"lastChoiceHost\":\"" + cb_selectServer.SelectedItem.ToString() + "\"}");
                 sw.Flush();
                 sw.Close();
             }
@@ -160,7 +165,8 @@ namespace brbypass_client
                 }
                 //disable button
                 btn_test.IsEnabled = false;
-            } else
+            }
+            else
             {
                 lbl_pingDelay.Content = "Empty Item";
             }
@@ -169,7 +175,7 @@ namespace brbypass_client
         private async void sendPingToHost(string hostname)
         {
             Ping ping = new Ping();
-            PingReply reply = await ping.SendPingAsync(hostname,1000);
+            PingReply reply = await ping.SendPingAsync(hostname, 1000);
             nowPingTest++;
             if (reply.Status == IPStatus.Success)
             {
@@ -183,7 +189,7 @@ namespace brbypass_client
                     btn_test.IsEnabled = true;
                     averagePingDelay = averagePingDelay / successPingTest;
                     lbl_pingDelay.Content = ((int)averagePingDelay).ToString() + "ms";
-                    LogController.Debug("Send Ping to \"" + hostname + "\": "+ ((int)averagePingDelay).ToString() + "ms"+".");
+                    LogController.Debug("Send Ping to \"" + hostname + "\": " + ((int)averagePingDelay).ToString() + "ms" + ".");
                 }
                 else
                 {
@@ -199,7 +205,8 @@ namespace brbypass_client
             if (logWindow != null)
             {
                 logWindow.Focus();
-            } else
+            }
+            else
             {
                 logWindow = new win_Log();
                 logWindow.Show();
@@ -207,36 +214,30 @@ namespace brbypass_client
         }
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
-        {            
+        {
             if (cb_selectServer.SelectedIndex != -1)
             {
                 cb_selectServer.IsEnabled = false;
                 //lock buttons
                 btn_start.IsEnabled = false;
                 btn_stop.IsEnabled = false;
-                //ping remote server
-                Ping ping = new Ping();
-                PingReply reply = ping.Send((servers[cb_selectServer.SelectedIndex]).host, 1000);
-                if (reply.Status == IPStatus.Success)
+
+                switch ((servers[cb_selectServer.SelectedIndex]).mode)
                 {
-                    switch ((servers[cb_selectServer.SelectedIndex]).mode)
-                    {
-                        case 1:
-                            socksServer = new SocksServer((ushort)(servers[cb_selectServer.SelectedIndex]).localPort);
-                            socksServer.Start((servers[cb_selectServer.SelectedIndex]).host, (servers[cb_selectServer.SelectedIndex]).port, (servers[cb_selectServer.SelectedIndex]).password);
-                            break;
-                    }
-                } else
-                {
-                    updateUI_startFailed();
-                }                
+                    case 1:
+                        socksServer = new SocksServer((ushort)(servers[cb_selectServer.SelectedIndex]).localPort);
+                        socksServer.Start((servers[cb_selectServer.SelectedIndex]).host, (servers[cb_selectServer.SelectedIndex]).port, (servers[cb_selectServer.SelectedIndex]).password);
+                        break;
+                }
+
             }
         }
 
         //ui update method
         public void updateUI_startFailed()
         {
-            var update = new Action(() => {
+            var update = new Action(() =>
+            {
                 btn_start.IsEnabled = true;
                 cb_selectServer.IsEnabled = true;
                 btn_stop.Visibility = Visibility.Hidden;
@@ -247,7 +248,8 @@ namespace brbypass_client
 
         public void updateUI_startSucceed()
         {
-            var update = new Action(() => {                
+            var update = new Action(() =>
+            {
                 btn_start.Visibility = Visibility.Hidden;
                 btn_stop.Visibility = Visibility.Visible;
                 btn_stop.IsEnabled = true;
@@ -279,7 +281,8 @@ namespace brbypass_client
             if (index >= cb_selectServer.Items.Count)
             {
                 cb_selectServer.SelectedIndex = cb_selectServer.Items.Count - 1;
-            } else
+            }
+            else
             {
                 cb_selectServer.SelectedIndex = index;
             }
@@ -290,7 +293,8 @@ namespace brbypass_client
             if (win_mps != null)
             {
                 win_mps.Focus();
-            } else
+            }
+            else
             {
                 win_mps = new win_manageProxyServer();
                 win_mps.Show();

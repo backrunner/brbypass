@@ -8,6 +8,7 @@ import re
 import ssl
 import threading
 from Controller import Config, Log
+from threading import Thread
 
 clients = {}
 
@@ -19,6 +20,8 @@ class SocksProxyServer:
         self.port = port
         self.server = None
         self.coro = None
+        self.iothread = None
+        self.ioloop = None
 
     def start(self, loop):
         self.coro = asyncio.start_server(
@@ -26,10 +29,21 @@ class SocksProxyServer:
         self.server = loop.run_until_complete(self.coro)
         Log.info("Sock proxy server started at " +
                  self.host + ":" + str(self.port))
+        self.ioloop = asyncio.new_event_loop()
+
+        def start_loop(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
+
+        iothread = Thread(target=start_loop, args=(self.ioloop,))
+        iothread.start()
+
         self.server = loop.run_forever()
 
     def stop(self, loop):
         if self.server is not None:
+            if self.ioloop is not None:
+                self.ioloop.close()
             self.server.close()
             loop.run_until_complete(self.server.wait_closed())
             Log.warn("Socks proxy server has been stopped.")
@@ -134,21 +148,17 @@ class SocksProxyServer:
                         contentLength = int.from_bytes(
                             b_length, byteorder='little')
                         b_content = await asyncio.wait_for(reader.read(contentLength), timeout=timeout)
-                        asyncio.Task(self.doproxy(remote=remote, reader=reader, writer=writer, address=address, port=port, data=b_content, timeout=timeout), loop=asyncio.get_event_loop())
+                        asyncio.run_coroutine_threadsafe(self.transferData(remote=remote, writer=writer, data=b_content), loop=self.ioloop)
 
-    async def doproxy(self,remote, reader, writer, address, port, data, timeout):
+    async def transferData(self, remote, writer, data):
+        header = b'\x06\x03\x04'
         loop = asyncio.get_event_loop()
         try:
-            asyncio.Task(self.transferData(remote=remote, writer=writer), loop=asyncio.get_event_loop())
             await loop.sock_sendall(remote, data)
             #Log.info("Data has sent to remote: " + str(data))
         except Exception as e:
             Log.error("An error occured when send data to remote: " + str(e))
             return
-
-    async def transferData(self, remote, writer):
-        header = b'\x06\x03\x03'
-        loop = asyncio.get_event_loop()
         while True:
             try:
                 recv = await loop.sock_recv(remote, 4096)
@@ -162,7 +172,10 @@ class SocksProxyServer:
                     #Log.info("Data received: "+str(recv))
                     b_sendLen = recv_len.to_bytes(2, byteorder='little')
                     writer.write(header+b_sendLen+recv)
-                    await writer.drain()
+                    try:
+                        await writer.drain()
+                    except:
+                        return
                     #Log.debug("Data has sent to local")
                 else:
                     break

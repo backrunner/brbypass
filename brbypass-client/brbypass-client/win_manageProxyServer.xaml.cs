@@ -51,6 +51,7 @@ namespace brbypass_client
         private void MetroWindow_Closed(object sender, EventArgs e)
         {
             MainWindow.mainWindow.IsEnabled = true;
+            MainWindow.mainWindow.win_mps = null;
         }
 
         private void Lb_servers_SelectionChanged(object sender, SelectionChangedEventArgs e)

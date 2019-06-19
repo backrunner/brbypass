@@ -330,7 +330,7 @@ namespace brbypass_client.Controller.Net
                         //  0     1     2    3 - 4    5 - ?
                         // 0x06  0x03  CMD  LENGTH    DATA
                         // CMD: 0x03 - TCP Response No Encryption
-                        if (_ProxyBuffer[0] == 0x06 && _ProxyBuffer[1] == 0x03 && _ProxyBuffer[2] == 0x04)
+                        if (_ProxyBuffer[0] == 0x06 && _ProxyBuffer[1] == 0x03 && _ProxyBuffer[2] == 0x03)
                         {
                             int contentLength = BitConverter.ToInt16(_ProxyBuffer, 3);
                             byte[] content = new byte[contentLength];
